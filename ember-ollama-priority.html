@@ -1,0 +1,4125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#060304">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Ember Voice (AI Priority)</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Playfair+Display:wght@400;500&family=Special+Elite&family=Press+Start+2P&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060304;
+    --surface: #140b0c;
+    --surface-2: #1c1112;
+    --line: rgba(255, 214, 208, 0.13);
+    --red: #9b111e;
+    --red-bright: #d0202f;
+    --glow: #ff7a45;
+    --text: #f6eeeb;
+    --muted: #b6a09b;
+    --faint: #7d6965;
+    --err: #ffb4a8;
+    --display: "Playfair Display", Georgia, "Times New Roman", serif;
+    --body: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+    --mono: "Special Elite", "American Typewriter", "Courier New", Courier, monospace;
+  }
+  /* ---- THEME: pixel ---- */
+  body.theme-pixel {
+    --bg: #0a0a14;
+    --surface: #16162a;
+    --surface-2: #22223a;
+    --line: rgba(120, 220, 255, 0.3);
+    --red: #2a5a8a;
+    --red-bright: #4aa8ff;
+    --glow: #ffd84a;
+    --text: #e8eaff;
+    --muted: #a8b0d0;
+    --faint: #6a7290;
+    --err: #ff5a5a;
+    --display: "Press Start 2P", "Courier New", monospace;
+    --body: "Press Start 2P", "Courier New", monospace;
+    --mono: "Press Start 2P", "Courier New", monospace;
+    font-size: 15px;
+  }
+  body.theme-pixel #status { font-size: 1.05rem; letter-spacing: 0; }
+  body.theme-pixel #reply { font-size: 0.95rem; font-style: normal; line-height: 1.5; }
+  body.theme-pixel #heard { font-size: 0.85rem; }
+  body.theme-pixel .hint { font-size: 0.75rem; }
+  body.theme-pixel .card h2 { font-size: 1.05rem; }
+  body.theme-pixel .card h3 { font-size: 0.85rem; }
+  body.theme-pixel .card p, body.theme-pixel .check, body.theme-pixel .field label { font-size: 0.75rem; line-height: 1.5; }
+  body.theme-pixel .btn, body.theme-pixel .chip, body.theme-pixel .menu-item { font-size: 0.8rem; }
+  body.theme-pixel .typebar input { font-size: 0.9rem; }
+  body.theme-pixel .brand { font-size: 0.95rem; }
+  body.theme-pixel .app::before {
+    background:
+      repeating-linear-gradient(0deg, transparent 0 3px, rgba(255,255,255,0.03) 3px 4px),
+      radial-gradient(ellipse 60% 42% at 50% 40%, rgba(74, 168, 255, 0.15), transparent 66%);
+  }
+  body.theme-pixel .btn, body.theme-pixel .chip, body.theme-pixel .send, body.theme-pixel .typebar input,
+  body.theme-pixel .field select, body.theme-pixel .field input[type="text"], body.theme-pixel .field input[type="password"] {
+    border-radius: 0 !important;
+  }
+  body.theme-pixel .menu-panel, body.theme-pixel .card { border-radius: 0 !important; }
+  /* ---- THEME: simple ---- */
+  body.theme-simple {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f2f2f2;
+    --line: #000000;
+    --red: #000000;
+    --red-bright: #000000;
+    --glow: #000000;
+    --text: #000000;
+    --muted: #444444;
+    --faint: #888888;
+    --err: #000000;
+    --display: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --body: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --mono: "Courier New", monospace;
+  }
+  body.theme-simple .app::before { background: none; animation: none; }
+  body.theme-simple .brand .dot { box-shadow: none; animation: none; background: #000; }
+  body.theme-simple .cursor { background: #000; animation: none; opacity: 1; }
+  body.theme-simple .btn, body.theme-simple .chip, body.theme-simple .send, body.theme-simple .typebar input,
+  body.theme-simple .field select, body.theme-simple .field input[type="text"], body.theme-simple .field input[type="password"] {
+    border: 1px solid #000 !important;
+    background: #fff;
+    border-radius: 0 !important;
+  }
+  body.theme-simple .btn.primary { background: #000; color: #fff; }
+  body.theme-simple .btn.primary:hover { background: #333; }
+  body.theme-simple .send { background: #000; color: #fff; }
+  body.theme-simple .menu-panel, body.theme-simple .card { border-radius: 0 !important; border: 1px solid #000; }
+  body.theme-simple .bub.user { background: #000; color: #fff; }
+  body.theme-simple .bub.assistant { background: #fff; border: 1px solid #000; }
+  body.theme-simple .hitem { border: 1px solid #000; background: #fff; }
+  body.theme-simple .sheet { background: rgba(255, 255, 255, 0.85); }
+  body.theme-simple .theme-preview { border-color: #000; }
+  /* ---- THEME: wireframe ---- */
+  body.theme-wireframe {
+    --bg: #000814;
+    --surface: #001020;
+    --surface-2: #001a30;
+    --line: rgba(80, 255, 200, 0.35);
+    --red: #00ff9d;
+    --red-bright: #4dffbb;
+    --glow: #00ff9d;
+    --text: #b8fff0;
+    --muted: #5ac8b0;
+    --faint: #2a6a5a;
+    --err: #ff5a7a;
+    --display: "Space Mono", "Courier New", monospace;
+    --body: "Space Mono", "Courier New", monospace;
+    --mono: "Space Mono", "Courier New", monospace;
+  }
+  body.theme-wireframe .app::before {
+    background:
+      repeating-linear-gradient(0deg, transparent 0 40px, rgba(0, 255, 157, 0.04) 40px 41px),
+      repeating-linear-gradient(90deg, transparent 0 40px, rgba(0, 255, 157, 0.04) 40px 41px),
+      radial-gradient(ellipse 60% 42% at 50% 40%, rgba(0, 255, 157, 0.1), transparent 66%);
+    animation: none;
+  }
+  body.theme-wireframe .brand .dot {
+    background: #00ff9d; box-shadow: 0 0 12px #00ff9d;
+    border-radius: 0;
+  }
+  body.theme-wireframe .cursor { background: #00ff9d; }
+  body.theme-wireframe .btn, body.theme-wireframe .chip, body.theme-wireframe .send,
+  body.theme-wireframe .menu-panel, body.theme-wireframe .card {
+    border-radius: 0 !important;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); }
+  body {
+    font-family: var(--body);
+    font-weight: 500;
+    font-size: 18px;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    transition: background 0.35s ease, color 0.35s ease;
+  }
+  button, input, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--glow); outline-offset: 2px; }
+
+  .app {
+    position: relative;
+    height: 100%;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    background: var(--bg);
+    transition: background 0.35s ease;
+  }
+  .app::before {
+    content: "";
+    position: absolute; inset: -10%;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 60% 42% at 50% 40%, rgba(155, 17, 30, 0.22), transparent 66%),
+      radial-gradient(ellipse 45% 30% at 50% 88%, rgba(255, 90, 40, 0.07), transparent 72%);
+    animation: breathe 9s ease-in-out infinite alternate;
+    transition: background 0.35s ease;
+  }
+  @keyframes breathe {
+    from { opacity: 0.65; transform: scale(1); }
+    to { opacity: 1; transform: scale(1.06); }
+  }
+
+  header {
+    position: relative; z-index: 2;
+    height: 58px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 0.9rem 0 1.2rem;
+    flex: none;
+  }
+  .brand {
+    font-family: var(--display);
+    font-size: 1.2rem;
+    letter-spacing: -0.02em;
+    display: flex; align-items: center; gap: 0.55rem;
+  }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--red-bright);
+    box-shadow: 0 0 10px var(--red-bright);
+    animation: pulse 2.8s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    50% { box-shadow: 0 0 16px var(--red-bright); transform: scale(1.18); }
+  }
+  .tools { position: relative; }
+  .menu-btn {
+    width: 40px; height: 40px; border-radius: 12px;
+    display: grid; place-items: center;
+    border: 0; background: none;
+    color: var(--muted);
+    transition: background 0.2s, color 0.2s;
+  }
+  .menu-btn:hover, .menu-btn[aria-expanded="true"] { background: var(--surface); color: var(--text); }
+  .menu-panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 200px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 6px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+    display: none;
+    flex-direction: column;
+    gap: 2px;
+    z-index: 20;
+  }
+  .menu-panel.open { display: flex; }
+  .menu-item {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%;
+    border: 0; background: none;
+    color: var(--text);
+    border-radius: 10px;
+    padding: 0.55rem 0.75rem;
+    text-align: left;
+    font-size: 1rem;
+    transition: background 0.15s;
+  }
+  .menu-item:hover { background: var(--surface-2); }
+  .menu-item svg { width: 18px; height: 18px; flex: none; color: var(--muted); }
+  .menu-item[aria-pressed="true"] { color: var(--glow); }
+  .menu-item[aria-pressed="true"] svg { color: var(--glow); }
+  .mood {
+    position: absolute; z-index: 2;
+    left: 1.2rem;
+    top: calc(env(safe-area-inset-top, 0px) + 50px);
+    font-family: var(--mono);
+    font-size: 0.92rem;
+    letter-spacing: 0.01em;
+    color: var(--faint);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  #moodText { color: var(--glow); }
+  .search-status {
+    position: absolute; z-index: 2;
+    left: 1.2rem;
+    top: calc(env(safe-area-inset-top, 0px) + 72px);
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    letter-spacing: 0.01em;
+    color: var(--faint);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .search-status .dot-live {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: 1px;
+    background: var(--faint);
+  }
+  .search-status.on .dot-live {
+    background: #9fe0b0;
+    box-shadow: 0 0 8px rgba(159, 224, 176, 0.7);
+  }
+  .search-status.busy .dot-live {
+    background: var(--glow);
+    box-shadow: 0 0 8px var(--glow);
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  .search-status.off .dot-live { background: var(--faint); }
+  #searchStatusText { color: var(--muted); }
+  .search-status.on #searchStatusText { color: #9fe0b0; }
+  .search-status.busy #searchStatusText { color: var(--glow); }
+  .search-timer {
+    position: absolute; z-index: 2;
+    left: 1.2rem;
+    top: calc(env(safe-area-inset-top, 0px) + 92px);
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.01em;
+    color: var(--faint);
+    pointer-events: none;
+    white-space: nowrap;
+    display: none;
+  }
+  .search-timer.visible { display: block; }
+  #searchTimerText { color: var(--muted); }
+  .cursor {
+    display: inline-block;
+    width: 0.55em; height: 1.05em;
+    margin-left: 2px;
+    vertical-align: -0.17em;
+    background: var(--glow);
+    opacity: 0.85;
+    animation: caret 1s steps(1) infinite;
+  }
+  @keyframes caret { 50% { opacity: 0; } }
+  .icon {
+    width: 35px; height: 40px; border-radius: 12px;
+    display: grid; place-items: center;
+    border: 0; background: none;
+    color: var(--muted);
+    transition: background 0.2s, color 0.2s;
+  }
+  .icon:hover { background: var(--surface); color: var(--text); }
+  .icon[aria-pressed="true"] { color: var(--glow); background: var(--surface); }
+  .icon svg { width: 20px; height: 20px; }
+  @media (max-width: 340px) { .icon { width: 30px; } }
+  #autoBtn .slash { display: none; }
+  #autoBtn.off { color: var(--red-bright); }
+  #autoBtn.off .slash { display: block; }
+  #autoBtn.off .wave { display: none; }
+
+  main {
+    position: relative; z-index: 1;
+    flex: 1; min-height: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 4px;
+    padding: 0 1.2rem 0.6rem;
+  }
+  .stage {
+    flex: none;
+    width: min(440px, 100vw, 46vh);
+    aspect-ratio: 1 / 1;
+  }
+  @supports (height: 1dvh) { .stage { width: min(440px, 100vw, 46dvh); } }
+  canvas {
+    width: 100%; height: 100%;
+    display: block;
+    touch-action: manipulation;
+    border-radius: 50%;
+  }
+  body.theme-pixel canvas, body.theme-wireframe canvas, body.theme-simple canvas { border-radius: 0; }
+  canvas:focus-visible { outline-offset: -24px; }
+
+  #status {
+    margin: 2px 0 0;
+    font-family: var(--display);
+    font-size: 1.4rem;
+    letter-spacing: -0.02em;
+    text-align: center;
+    min-height: 1.7em;
+    max-width: 30ch;
+    line-height: 1.25;
+  }
+  #status.pop { animation: pop 0.38s ease both; }
+  #status.err { color: var(--err); }
+  @keyframes pop { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+
+  #heard {
+    margin: 0;
+    max-width: 32ch;
+    text-align: center;
+    color: var(--muted);
+    font-size: 1.15rem;
+    line-height: 1.3;
+  }
+  #heard:not(:empty)::before { content: "\201C"; }
+  #heard:not(:empty)::after { content: "\201D"; }
+
+  .reply-wrap { width: 100%; max-width: 36ch; text-align: center; margin-top: 4px; }
+  .reply-wrap[hidden] { display: none; }
+  #reply {
+    margin: 0;
+    max-height: 24vh;
+    overflow-y: auto;
+    scrollbar-width: none;
+    font-size: 1.32rem;
+    line-height: 1.4;
+    font-style: italic;
+    animation: pop 0.45s ease both;
+  }
+  #reply::-webkit-scrollbar { display: none; }
+  .reply-meta {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    justify-content: center; align-items: center;
+    margin-top: 10px;
+  }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 0.28rem 0.85rem 0.28rem 0.7rem;
+    font-size: 1rem;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+  .chip svg { width: 15px; height: 15px; }
+  .chip:hover { color: var(--text); background: rgba(255, 255, 255, 0.07); }
+  .chip.on { color: var(--glow); border-color: var(--glow); }
+  .source { color: var(--faint); font-size: 0.95rem; }
+  .source:empty { display: none; }
+
+  .hint {
+    margin: 8px 0 0;
+    max-width: 34ch;
+    text-align: center;
+    color: var(--faint);
+    font-size: 1.02rem;
+    min-height: 1.3em;
+    transition: opacity 0.6s ease;
+  }
+  .hint.fade { opacity: 0; }
+
+  .typebar {
+    position: relative; z-index: 2;
+    display: flex; gap: 8px;
+    padding: 0.4rem 1rem 0.9rem;
+    flex: none;
+  }
+  .typebar[hidden] { display: none; }
+  .typebar input {
+    flex: 1; min-width: 0;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 0.72rem 1rem;
+    font-size: 1.1rem;
+  }
+  .typebar input::placeholder { color: var(--faint); }
+  .send {
+    width: 48px; flex: none;
+    border: 0; border-radius: 16px;
+    background: var(--red);
+    display: grid; place-items: center;
+    transition: background 0.2s;
+  }
+  .send:hover { background: var(--red-bright); }
+  .send svg { width: 20px; height: 20px; }
+
+  .sheet {
+    position: fixed; inset: 0; z-index: 10;
+    background: rgba(0, 0, 0, 0.6);
+    display: grid; align-items: end;
+    animation: fadein 0.2s ease;
+  }
+  .sheet[hidden] { display: none; }
+  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+  .card {
+    background: var(--bg);
+    border-top: 1px solid var(--line);
+    border-radius: 1.3rem 1.3rem 0 0;
+    padding: 1.1rem 1.2rem calc(1.2rem + env(safe-area-inset-bottom));
+    max-height: 90vh; overflow-y: auto;
+    width: 100%; max-width: 560px; margin: 0 auto;
+    animation: rise 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  @keyframes rise { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .card h2 { font-family: var(--display); font-weight: 500; margin: 0 0 0.2rem; font-size: 1.4rem; letter-spacing: -0.02em; }
+  .card h3 { font-family: var(--display); font-weight: 400; margin: 1.3rem 0 0.2rem; font-size: 1.1rem; }
+  .card p { margin: 0.3rem 0; color: var(--muted); line-height: 1.4; }
+  .field { display: grid; gap: 5px; margin: 0.75rem 0; }
+  .field label { color: var(--muted); font-size: 1rem; }
+  .field select, .field input[type="text"], .field input[type="password"] {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 0.62rem 0.8rem;
+    font-size: 1.05rem;
+  }
+  .field input[type="range"] { accent-color: var(--red-bright); width: 100%; }
+  .row { display: flex; gap: 8px; margin-top: 0.7rem; }
+  .btn {
+    flex: 1;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 0.68rem;
+    font-size: 1.1rem;
+    transition: background 0.2s;
+  }
+  .btn:hover { background: var(--surface-2); }
+  .btn.primary { background: var(--red); border-color: transparent; color: var(--text); }
+  .btn.primary:hover { background: var(--red-bright); }
+  .note { font-size: 0.98rem; color: var(--faint) !important; }
+  #aiResult { min-height: 1.3em; }
+  .ok { color: #9fe0b0 !important; }
+  .bad { color: var(--err) !important; }
+
+  .check { display: flex; gap: 0.7rem; align-items: flex-start; margin: 0.8rem 0; cursor: pointer; line-height: 1.3; }
+  .check input:disabled + span { opacity: 0.45; }
+  .check input { width: 20px; height: 20px; margin-top: 0.2rem; accent-color: var(--red-bright); flex: none; }
+  .check small { display: block; color: var(--faint); font-size: 0.95rem; margin-top: 2px; }
+  .attach-row { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 6px; max-width: 36ch; }
+  .attach-row[hidden] { display: none; }
+  .achip { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.04); border-radius: 999px; padding: 0.15rem 0.3rem 0.15rem 0.8rem; color: var(--muted); font-size: 1rem; max-width: 100%; }
+  .achip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 15ch; }
+  .achip button { border: 0; background: none; color: var(--muted); width: 26px; height: 26px; border-radius: 50%; font-size: 1.15rem; line-height: 1; }
+  .achip button:hover { color: var(--text); }
+  .hitem { display: block; width: 100%; text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 0.65rem 0.85rem; margin: 0.45rem 0; }
+  .hitem:hover { background: var(--surface-2); }
+  .hitem b { display: block; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hitem small { color: var(--faint); font-size: 0.95rem; }
+  .hitem.cur { border-color: var(--glow); }
+  .empty { color: var(--faint); text-align: center; margin: 1.2rem 0; }
+  .bub { margin: 0.5rem 0; padding: 0.55rem 0.8rem; border-radius: 14px; line-height: 1.35; max-width: 92%; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .bub.user { margin-left: auto; background: rgba(155, 17, 30, 0.55); }
+  .bub.assistant { background: var(--surface); border: 1px solid var(--line); }
+
+  /* theme picker */
+  .theme-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin: 0.6rem 0;
+  }
+  .theme-choice {
+    border: 1px solid var(--line);
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 0.7rem 0.6rem;
+    text-align: center;
+    font-size: 0.95rem;
+    transition: background 0.2s, border-color 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .theme-choice:hover { background: var(--surface-2); }
+  .theme-choice[aria-pressed="true"] { border-color: var(--glow); color: var(--glow); }
+  .theme-preview {
+    width: 46px; height: 46px; border-radius: 50%;
+    border: 1px solid var(--line);
+    display: block;
+  }
+  .theme-preview.preview-ember {
+    background: radial-gradient(circle at 35% 35%, #ffe4d8, #ff7a45 25%, #d0202f 55%, #3a0c12 100%);
+    box-shadow: 0 0 14px rgba(255, 122, 69, 0.55);
+  }
+  .theme-preview.preview-pixel {
+    background: #0a0a14;
+    border-radius: 0;
+    border-color: #4aa8ff;
+    box-shadow: inset 0 0 0 3px #16162a, inset 0 0 0 6px #4aa8ff, 0 0 0 1px #ffd84a;
+  }
+  .theme-preview.preview-simple {
+    background: #fff;
+    border-color: #000;
+    border-width: 2px;
+  }
+  .theme-preview.preview-wireframe {
+    background: radial-gradient(circle, #00ff9d 10%, #001020 60%);
+    border-color: #00ff9d;
+    box-shadow: 0 0 0 2px #001020, 0 0 12px rgba(0, 255, 157, 0.6);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .app::before, .dot, .cursor { animation: none; }
+    #status.pop, #reply, .card, .sheet { animation: none; }
+  }
+</style>
+</head>
+<body class="theme-ember">
+<div class="app">
+  <div class="mood" role="status" aria-live="off" aria-label="Ember's mood">mood: <span id="moodText"></span><span class="cursor" aria-hidden="true"></span></div>
+  <div class="search-status off" id="searchStatus" role="status" aria-live="polite" aria-label="Idle search status">
+    <span class="dot-live" aria-hidden="true"></span><span id="searchStatusText">idle search: off</span>
+  </div>
+  <div class="search-timer" id="searchTimer" role="status" aria-live="off" aria-label="Idle search duration">
+    <span id="searchTimerText">searching for 0s</span>
+  </div>
+  <header>
+    <div class="brand"><span class="dot" aria-hidden="true"></span>Ember</div>
+    <div class="tools">
+      <button class="menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false" title="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <div class="menu-panel" id="menuPanel">
+        <button class="menu-item" id="typeBtn" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M7 10h.01M11 10h.01M15 10h.01M7 14h10"/></svg>
+          Type a message
+        </button>
+        <button class="menu-item" id="handsBtn" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+          Hands-free
+        </button>
+        <button class="menu-item" id="attachBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5l-8.6 8.6a5 5 0 0 1-7.1-7.1l8.6-8.6a3.4 3.4 0 0 1 4.8 4.8l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l7.9-7.9"/></svg>
+          Attach file
+        </button>
+        <button class="menu-item" id="histBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+          History
+        </button>
+        <button class="menu-item" id="discoverBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          Discoveries
+        </button>
+        <button class="menu-item" id="autoBtn" aria-pressed="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4h3l5 4V6L7 10H4z"/><g class="wave"><path d="M16 9.5a4 4 0 010 5"/><path d="M18.5 7a7 7 0 010 10"/></g><path class="slash" d="M16 9l5 6M21 9l-5 6"/></svg>
+          Read aloud
+        </button>
+        <button class="menu-item" id="settingsBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+          Settings
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="stage">
+      <canvas id="orb" width="840" height="840" role="button" tabindex="0" aria-label="Tap to talk to Ember"></canvas>
+    </div>
+    <p id="status" aria-live="polite">Tap the orb to talk.</p>
+    <p id="heard"></p>
+    <div class="reply-wrap" id="replyWrap" hidden>
+      <p id="reply" aria-live="polite"></p>
+      <div class="reply-meta">
+        <button class="chip" id="readBtn" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4h3l5 4V6L7 10H4z"/><path d="M16 9.5a4 4 0 010 5"/><path d="M18.5 7a7 7 0 010 10"/></svg>
+          <span>Read aloud</span>
+        </button>
+        <button class="chip" id="copyBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A1.5 1.5 0 0 1 6.5 5H15"/></svg>
+          <span>Copy</span>
+        </button>
+        <span class="source" id="source"></span>
+      </div>
+    </div>
+    <div class="attach-row" id="attachRow" hidden></div>
+    <p class="hint" id="hint"></p>
+  </main>
+
+  <div class="typebar" id="typeBar" hidden>
+    <input id="typeInput" type="text" placeholder="Type to Ember" autocomplete="off" enterkeyhint="send" aria-label="Type a message to Ember">
+    <button class="send" id="typeSend" aria-label="Send">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+</div>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <h2 id="sheetTitle">Ember Voice</h2>
+    <p>Tap the orb and talk. Ember answers out loud and shows the reply on screen.</p>
+    <p>Try asking for the weather, a timer, a quick calculation, a conversion, or who someone was. Say “remember that…” to keep a note.</p>
+    <p>On a phone, shake it and Ember wobbles, looks confused, then shakes its head to fix its face.</p>
+
+    <h3>Theme</h3>
+    <div class="theme-grid" id="themeGrid">
+      <button class="theme-choice" type="button" data-theme="ember" aria-pressed="true">
+        <span class="theme-preview preview-ember" aria-hidden="true"></span>
+        Ember
+      </button>
+      <button class="theme-choice" type="button" data-theme="pixel" aria-pressed="false">
+        <span class="theme-preview preview-pixel" aria-hidden="true"></span>
+        Pixel
+      </button>
+      <button class="theme-choice" type="button" data-theme="simple" aria-pressed="false">
+        <span class="theme-preview preview-simple" aria-hidden="true"></span>
+        Simple
+      </button>
+      <button class="theme-choice" type="button" data-theme="wireframe" aria-pressed="false">
+        <span class="theme-preview preview-wireframe" aria-hidden="true"></span>
+        Wireframe
+      </button>
+    </div>
+
+    <h3>Modes</h3>
+    <label class="check"><input type="checkbox" id="interactChk"><span>Interact only<small>Ember stops listening completely. Tapping the orb, even many times, never turns the microphone on. She only reacts to your touch.</small></span></label>
+
+    <h3>Voice</h3>
+    <div class="field">
+      <label for="voiceSel">Voice</label>
+      <select id="voiceSel"><option value="">Automatic</option></select>
+    </div>
+    <div class="field">
+      <label for="rateRange">Speed: <span id="rateVal">1.0</span>×</label>
+      <input type="range" id="rateRange" min="0.7" max="1.4" step="0.05" value="1">
+    </div>
+    <div class="row"><button class="btn" id="testVoice">Hear this voice</button></div>
+
+    <h3>ElevenLabs voice (optional)</h3>
+    <p>Paste an ElevenLabs key and voice ID to use a much richer voice. Leave blank to use your phone's built-in voice.</p>
+    <div class="field">
+      <label for="elKey">API key</label>
+      <input type="password" id="elKey" autocomplete="off" spellcheck="false" placeholder="sk_…">
+    </div>
+    <div class="field">
+      <label for="elVoice">Voice ID</label>
+      <input type="text" id="elVoice" autocomplete="off" spellcheck="false" placeholder="21m00Tcm4TlvDq8ikWAM">
+    </div>
+    <div class="field">
+      <label for="elModel">Model</label>
+      <select id="elModel">
+        <option value="eleven_flash_v2_5">Flash v2.5 — fastest, cheapest</option>
+        <option value="eleven_turbo_v2_5">Turbo v2.5 — balanced</option>
+        <option value="eleven_multilingual_v2">Multilingual v2 — highest quality</option>
+      </select>
+    </div>
+    <div class="row"><button class="btn" id="testEl">Test ElevenLabs voice</button></div>
+    <p class="note" id="elNote">Your key is stored only in this browser. On a public site, anyone can see it in DevTools — only use this on a PWA you control.</p>
+
+    <h3>Smarter answers</h3>
+    <p>Ember handles lookups, weather, math, timers and notes by herself. For open conversation she uses an AI model.</p>
+    <div class="field">
+      <label for="provSel">AI model</label>
+      <select id="provSel">
+        <option value="free">Free AI (no key needed)</option>
+        <option value="anthropic">Claude (your Anthropic key)</option>
+        <option value="openai">OpenAI-compatible (your key)</option>
+        <option value="none">Built-in answers only</option>
+      </select>
+    </div>
+    <p class="note" id="freeNote">The free AI is a public online service. Everything you say, any file you attach, your name, and your saved notes and memories are sent to it on every turn, so keep private things out. It can be slow and may change or disappear. Your own key is more reliable.</p>
+    <div id="aiFields" hidden>
+      <div class="field">
+        <label for="keyInp">API key</label>
+        <input type="password" id="keyInp" autocomplete="off" spellcheck="false" placeholder="Paste your key">
+      </div>
+      <div class="field">
+        <label for="modelInp">Model (optional)</label>
+        <input type="text" id="modelInp" autocomplete="off" spellcheck="false" placeholder="">
+      </div>
+      <div class="field" id="baseField" hidden>
+        <label for="baseInp">Base URL (optional)</label>
+        <input type="text" id="baseInp" autocomplete="off" spellcheck="false" placeholder="https://api.openai.com/v1">
+      </div>
+      <p class="note">Your key is saved only in this browser on this device. Anyone who can open this page on your device can use it.</p>
+    </div>
+    <div class="row">
+      <button class="btn" id="testAI">Test connection</button>
+      <button class="btn" id="clearKey">Remove key</button>
+    </div>
+    <p id="aiResult" class="note"></p>
+
+    <h3>Web search</h3>
+    <p>Add a Tavily key and Ember can search the web for news, scores, prices and anything recent.</p>
+    <div class="field">
+      <label for="tavInp">Tavily key (optional)</label>
+      <input type="password" id="tavInp" autocomplete="off" spellcheck="false" placeholder="tvly-…">
+    </div>
+
+    <h3>Hands-free</h3>
+    <label class="check"><input type="checkbox" id="handsChk"><span>Hands-free mode<small>Turns on the options below together. You can also switch it from the microphone button at the top.</small></span></label>
+    <label class="check"><input type="checkbox" id="wakeChk"><span>Say “Hey Ember” to wake her<small>Keeps the microphone on while this page is open. Uses more battery, and some phones chirp each time it restarts.</small></span></label>
+    <label class="check"><input type="checkbox" id="convoChk"><span>Keep listening after she answers<small>A back-and-forth chat. Say goodbye or tap the orb to stop.</small></span></label>
+    <label class="check"><input type="checkbox" id="bargeChk"><span>Interrupt her by speaking<small>Works best with headphones. Without them she may hear herself.</small></span></label>
+
+    <h3>Memory</h3>
+    <div class="row"><button class="btn" id="clearNotes">Clear my notes</button></div>
+    <p class="note" id="notesResult"></p>
+
+    <div class="row"><button class="btn primary" id="closeSheet">Done</button></div>
+  </div>
+</div>
+
+<div class="sheet" id="histSheet" hidden>
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="histTitle">
+    <div id="histList">
+      <h2 id="histTitle">History</h2>
+      <p>Your conversations are saved on this device.</p>
+      <div class="row"><button class="btn primary" id="newConvoBtn">New conversation</button></div>
+      <div id="histItems"></div>
+      <div class="row">
+        <button class="btn" id="exportAll">Export all</button>
+        <button class="btn" id="importBtn">Import</button>
+      </div>
+      <p class="note" id="histNote">To move chats to another device, export them here and import the file there.</p>
+      <div class="row"><button class="btn" id="closeHist">Close</button></div>
+    </div>
+    <div id="histDetail" hidden>
+      <h2 id="detailTitle"></h2>
+      <p id="detailMeta" class="note"></p>
+      <div id="detailMsgs"></div>
+      <div class="row">
+        <button class="btn primary" id="detailContinue">Continue</button>
+        <button class="btn" id="detailExport">Export</button>
+      </div>
+      <div class="row">
+        <button class="btn" id="detailCopy">Copy</button>
+        <button class="btn" id="detailDelete">Delete</button>
+      </div>
+      <div class="row"><button class="btn" id="detailBack">Back</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="discoverSheet" hidden>
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="discoverTitle">
+    <h2 id="discoverTitle">Discoveries</h2>
+    <p>Things Ember searched and found interesting during downtime.</p>
+    <div id="discoverItems"></div>
+    <div class="row"><button class="btn" id="clearDiscover">Clear discoveries</button></div>
+    <div class="row"><button class="btn primary" id="closeDiscover">Close</button></div>
+  </div>
+</div>
+<input type="file" id="fileInp" accept="image/*,application/pdf,text/*,.md,.csv,.json,.txt,.js,.py,.html,.css,.xml,.log,.yml,.yaml" multiple hidden>
+<input type="file" id="importFile" accept="application/json,.json" hidden>
+
+<script>
+"use strict";
+/* =====================================================================
+   Ember Voice — with themes
+   ===================================================================== */
+
+const $ = (id) => document.getElementById(id);
+const clamp = (n, a = 0, b = 1) => Math.max(a, Math.min(b, n));
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const lastPicked = {};
+function pickFresh(key, arr) {
+  if (!arr || !arr.length) return "";
+  if (arr.length < 2) return arr[0];
+  let v;
+  do { v = pick(arr); } while (v === lastPicked[key]);
+  lastPicked[key] = v;
+  return v;
+}
+const store = {
+  get(key, fallback) {
+    try {
+      const v = localStorage.getItem("ember-voice:" + key);
+      return v == null ? fallback : JSON.parse(v);
+    } catch (e) { return fallback; }
+  },
+  set(key, value) {
+    try { localStorage.setItem("ember-voice:" + key, JSON.stringify(value)); } catch (e) {}
+  }
+};
+
+const canvas = $("orb");
+const ctx = canvas.getContext("2d");
+const statusEl = $("status");
+const heardEl = $("heard");
+const replyEl = $("reply");
+const replyWrap = $("replyWrap");
+const sourceEl = $("source");
+const readBtn = $("readBtn");
+const copyBtn = $("copyBtn");
+const hintEl = $("hint");
+const typeBar = $("typeBar");
+const typeInput = $("typeInput");
+const typeBtn = $("typeBtn");
+const autoBtn = $("autoBtn");
+const sheet = $("sheet");
+const moodEl = $("moodText");
+
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const TTS = "speechSynthesis" in window && typeof SpeechSynthesisUtterance !== "undefined";
+const SECURE = window.isSecureContext !== false;
+const REDUCE = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+const FINE_POINTER = !!(window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches);
+const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent || "");
+
+const DEFAULTS = { v: 3, autoRead: true, rate: 1, voiceURI: "", provider: "free", apiKey: "", model: "", baseUrl: "", wake: false, convo: false, barge: false, tavilyKey: "", interactOnly: false, elevenKey: "", elevenVoiceId: "", elevenModel: "eleven_flash_v2_5", theme: "ember" };
+const settings = Object.assign({}, DEFAULTS, store.get("settings", {}));
+if (!settings.v || settings.v < 3) {
+  if (settings.provider === "none") settings.provider = "free";
+  settings.v = 3;
+}
+function saveSettings() { store.set("settings", settings); }
+
+/* ----- THEMES ----- */
+const THEMES = {
+  ember: {
+    name: "Ember",
+    bg: "#060304",
+    fill: "gradient",
+    body: {
+      hi: "#ffe4d8", warm: "#ffb07a", mid: "#ff5a32", deep: "#b01824", edge: "#6a1018"
+    },
+    rimColor: [255, 186, 140, 0.45],
+    ringColor: (glow) => [255, 120 + glow * 60, 90, 0.16 + 0.44],
+    auraColor: (glow) => `rgba(${Math.round(80 + glow * 175)}, ${Math.round(10 + glow * 40)}, 12, ${(0.18 + glow * 0.32).toFixed(3)})`,
+    eyeColor: "#fff8f3",
+    browColor: "rgba(255, 246, 238, 0.92)",
+    sparkColor: (glow) => `rgba(255, ${Math.round(70 + glow * 90)}, 36,`,
+    timerColor: "#ffd7c0",
+    timerGlow: "rgba(255, 180, 120, 0.7)",
+    timerBox: "rgba(30, 8, 10, 0.55)",
+    timerLine: "rgba(255, 200, 160, 0.45)",
+    zedColor: "rgba(255, 210, 200,",
+    thinkDot: (a, m) => `rgba(255, 170, 110, ${(0.85 * m * (0.55 + 0.45 * Math.sin(a * 2))).toFixed(3)})`,
+    rippleColor: (p) => `rgba(255, 150, 90, ${((1 - p) * 0.55).toFixed(3)})`,
+    reflectionColor: "rgba(196, 28, 44, 0.7)",
+    eyeShape: "oval",
+    hasAura: true,
+    hasGradient: true,
+    hasShine: true,
+    hasInner: true,
+    hardEdges: false
+  },
+  pixel: {
+    name: "Pixel",
+    bg: "#0a0a14",
+    fill: "flat",
+    body: {
+      hi: "#1a1a2e", warm: "#2a2a4a", mid: "#3a3a5a", deep: "#1a1a2e", edge: "#0a0a14"
+    },
+    rimColor: [74, 168, 255, 0.9],
+    ringColor: (glow) => [255, 216, 74, 0.7 + 0.3 * glow],
+    auraColor: () => "rgba(0, 0, 0, 0)",
+    eyeColor: "#ffd84a",
+    browColor: "#ffd84a",
+    sparkColor: () => "rgba(255, 216, 74,",
+    timerColor: "#ffd84a",
+    timerGlow: "rgba(255, 216, 74, 0.8)",
+    timerBox: "rgba(10, 10, 20, 0.9)",
+    timerLine: "rgba(255, 216, 74, 0.7)",
+    zedColor: "rgba(255, 216, 74,",
+    thinkDot: (a, m) => `rgba(74, 168, 255, ${(0.9 * m).toFixed(3)})`,
+    rippleColor: (p) => `rgba(74, 168, 255, ${((1 - p) * 0.8).toFixed(3)})`,
+    reflectionColor: "rgba(74, 168, 255, 0.5)",
+    eyeShape: "square",
+    hasAura: false,
+    hasGradient: false,
+    hasShine: false,
+    hasInner: false,
+    hardEdges: true
+  },
+  simple: {
+    name: "Simple",
+    bg: "#ffffff",
+    fill: "white",
+    body: {
+      hi: "#ffffff", warm: "#ffffff", mid: "#f0f0f0", deep: "#e0e0e0", edge: "#000000"
+    },
+    rimColor: [0, 0, 0, 1],
+    ringColor: () => [0, 0, 0, 0.7],
+    auraColor: () => "rgba(0, 0, 0, 0)",
+    eyeColor: "#000000",
+    browColor: "#000000",
+    sparkColor: () => "rgba(0, 0, 0,",
+    timerColor: "#000000",
+    timerGlow: "rgba(0, 0, 0, 0)",
+    timerBox: "rgba(255, 255, 255, 0.9)",
+    timerLine: "rgba(0, 0, 0, 0.6)",
+    zedColor: "rgba(0, 0, 0,",
+    thinkDot: (a, m) => `rgba(0, 0, 0, ${(0.8 * m).toFixed(3)})`,
+    rippleColor: (p) => `rgba(0, 0, 0, ${((1 - p) * 0.7).toFixed(3)})`,
+    reflectionColor: "rgba(0, 0, 0, 0.25)",
+    eyeShape: "oval",
+    hasAura: false,
+    hasGradient: false,
+    hasShine: false,
+    hasInner: false,
+    hardEdges: false
+  },
+  wireframe: {
+    name: "Wireframe",
+    bg: "#000814",
+    fill: "wire",
+    body: {
+      hi: "#001a30", warm: "#002238", mid: "#002a40", deep: "#001020", edge: "#00ff9d"
+    },
+    rimColor: [0, 255, 157, 0.9],
+    ringColor: (glow) => [0, 255, 157, 0.4 + 0.5 * glow],
+    auraColor: () => "rgba(0, 0, 0, 0)",
+    eyeColor: "#00ff9d",
+    browColor: "rgba(0, 255, 157, 0.85)",
+    sparkColor: () => "rgba(0, 255, 157,",
+    timerColor: "#00ff9d",
+    timerGlow: "rgba(0, 255, 157, 0.7)",
+    timerBox: "rgba(0, 8, 20, 0.9)",
+    timerLine: "rgba(0, 255, 157, 0.7)",
+    zedColor: "rgba(0, 255, 157,",
+    thinkDot: (a, m) => `rgba(0, 255, 157, ${(0.9 * m * (0.55 + 0.45 * Math.sin(a * 2))).toFixed(3)})`,
+    rippleColor: (p) => `rgba(0, 255, 157, ${((1 - p) * 0.7).toFixed(3)})`,
+    reflectionColor: "rgba(0, 255, 157, 0.4)",
+    eyeShape: "oval",
+    hasAura: false,
+    hasGradient: false,
+    hasShine: false,
+    hasInner: false,
+    hardEdges: true,
+    wire: true
+  }
+};
+let theme = THEMES[settings.theme] || THEMES.ember;
+
+function applyTheme(name) {
+  if (!THEMES[name]) name = "ember";
+  settings.theme = name;
+  saveSettings();
+  theme = THEMES[name];
+  document.body.className = "theme-" + name;
+  // theme-color meta for the PWA status bar
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute("content", theme.bg);
+  // update the picker buttons
+  document.querySelectorAll(".theme-choice").forEach((b) => {
+    b.setAttribute("aria-pressed", b.dataset.theme === name ? "true" : "false");
+  });
+}
+
+let notes = store.get("notes", null);
+if (!Array.isArray(notes)) {
+  try { notes = JSON.parse(localStorage.getItem("ember-voice-memory") || "[]"); } catch (e) { notes = []; }
+  if (!Array.isArray(notes)) notes = [];
+}
+let memory = store.get("memory", { facts: {}, preferences: {}, goals: [], lastSummary: "", lastSeen: 0, checkins: {}, discoveries: [], interests: [] });
+if (!memory || typeof memory !== "object") memory = { facts: {}, preferences: {}, goals: [], lastSummary: "", lastSeen: 0, checkins: {}, discoveries: [], interests: [] };
+if (!Array.isArray(memory.discoveries)) memory.discoveries = [];
+if (!Array.isArray(memory.interests)) memory.interests = [];
+if (!Array.isArray(memory.goals)) memory.goals = [];
+if (!memory.facts || typeof memory.facts !== "object") memory.facts = {};
+if (!memory.preferences || typeof memory.preferences !== "object") memory.preferences = {};
+function capObject(obj, max) {
+  const keys = Object.keys(obj);
+  while (keys.length > max) delete obj[keys.shift()];
+}
+function saveMemory() {
+  const keepName = memory.facts.name;
+  capObject(memory.preferences, 30);
+  capObject(memory.facts, 30);
+  if (keepName) memory.facts.name = keepName;
+  memory.goals = memory.goals.slice(-8);
+  store.set("memory", memory);
+}
+function saveNotes() { notes = notes.slice(-40); store.set("notes", notes); }
+let userName = store.get("name", "") || memory.facts.name || "";
+
+let state = "idle";
+let baseStatus = "";
+let baseErr = false;
+let flashTimer = 0;
+let speaking = false;
+let lastReply = "";
+let pending = null;
+const history = [];
+
+function showStatus(text, isErr) {
+  if (statusEl.textContent !== text) {
+    statusEl.textContent = text;
+    statusEl.classList.remove("pop");
+    void statusEl.offsetWidth;
+    statusEl.classList.add("pop");
+  }
+  statusEl.classList.toggle("err", !!isErr);
+}
+function setStatus(text, isErr) {
+  baseStatus = text;
+  baseErr = !!isErr;
+  clearTimeout(flashTimer);
+  showStatus(text, baseErr);
+}
+function flash(text, ms) {
+  clearTimeout(flashTimer);
+  showStatus(text, false);
+  flashTimer = setTimeout(() => showStatus(baseStatus, baseErr), ms);
+}
+function refreshStatus() { clearTimeout(flashTimer); showStatus(baseStatus, baseErr); }
+function handsOn() { return !!(settings.wake || settings.convo); }
+function idleText() {
+  if (settings.interactOnly) return "Interact only: touch the orb.";
+  return SR ? "Tap the orb to talk." : "Tap the keyboard to type.";
+}
+let moodShown = "";
+let moodTarget = "";
+let moodTimer = 0;
+function setMoodLabel(text) {
+  if (!moodEl || text === moodTarget) return;
+  moodTarget = text;
+  if (REDUCE) { moodShown = text; moodEl.textContent = text; return; }
+  if (!moodTimer) moodTimer = setInterval(moodTick, 48);
+}
+function moodTick() {
+  if (!moodTarget.startsWith(moodShown)) moodShown = moodShown.slice(0, -1);
+  else if (moodShown.length < moodTarget.length) moodShown = moodTarget.slice(0, moodShown.length + 1);
+  else { clearInterval(moodTimer); moodTimer = 0; }
+  moodEl.textContent = moodShown;
+}
+function setState(next, text, isErr) {
+  state = next;
+  if (next === "idle") { mind.idleSince = performance.now(); settleIdle(); scheduleWake(900); }
+  else stopWake();
+  setStatus(text == null ? idleText() : text, isErr);
+  canvas.setAttribute("aria-label", baseStatus);
+  updateReadBtn();
+}
+function showReply(text, source) {
+  replyEl.textContent = text || "";
+  replyEl.scrollTop = 0;
+  sourceEl.textContent = source ? "via " + source : "";
+  replyWrap.hidden = !text;
+  if (text) hintEl.textContent = "";
+  replyEl.style.animation = "none";
+  void replyEl.offsetWidth;
+  replyEl.style.animation = "";
+  updateReadBtn();
+}
+function updateReadBtn() {
+  const label = readBtn.querySelector("span");
+  if (label) label.textContent = speaking ? "Stop" : "Read aloud";
+  readBtn.classList.toggle("on", speaking);
+  readBtn.setAttribute("aria-pressed", speaking ? "true" : "false");
+}
+function updateAutoBtn() {
+  autoBtn.classList.toggle("off", !settings.autoRead);
+  autoBtn.setAttribute("aria-label", "Read replies aloud: " + (settings.autoRead ? "on" : "off"));
+  autoBtn.title = settings.autoRead ? "Replies are read aloud" : "Replies are silent (tap Read aloud under a reply)";
+}
+
+let voicesCache = [];
+let speakTok = 0;
+let energy = 0;
+function loadVoices() {
+  if (!TTS) return;
+  try { voicesCache = speechSynthesis.getVoices() || []; } catch (e) { voicesCache = []; }
+  fillVoiceSelect();
+}
+function pickVoice() {
+  if (!voicesCache.length) loadVoices();
+  const v = voicesCache;
+  if (settings.voiceURI) {
+    const saved = v.find((x) => x.voiceURI === settings.voiceURI);
+    if (saved) return saved;
+  }
+  const lang = (navigator.language || "en-US").toLowerCase().replace("_", "-");
+  const shortLang = lang.slice(0, 2);
+  const good = /natural|neural|enhanced|premium|google|samantha|female/i;
+  return v.find((x) => x.lang.toLowerCase().replace("_", "-") === lang && good.test(x.name))
+    || v.find((x) => x.lang.toLowerCase().slice(0, 2) === shortLang && good.test(x.name))
+    || v.find((x) => x.lang.toLowerCase().replace("_", "-") === lang)
+    || v.find((x) => /^en/i.test(x.lang) && good.test(x.name))
+    || v.find((x) => x.default)
+    || v[0] || null;
+}
+function cleanForSpeech(t) {
+  return String(t)
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/https?:\/\/\S+/g, "")
+    .replace(/[*_#>`~|]/g, "")
+    .replace(/^\s*[-•]\s+/gm, "")
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, "")
+    .replace(/\s*\n+\s*/g, " ")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+function chunkForSpeech(t) {
+  const sentences = t.match(/[^.!?…]+(?:[.!?…]+["')\]]?|$)\s*/g) || [t];
+  const out = [];
+  let cur = "";
+  for (const s of sentences) {
+    if (cur && (cur + s).length > 200) { out.push(cur.trim()); cur = s; }
+    else cur += s;
+  }
+  if (cur.trim()) out.push(cur.trim());
+  const final = [];
+  out.forEach((c) => {
+    while (c.length > 230) {
+      let cut = c.lastIndexOf(", ", 200);
+      if (cut < 80) cut = c.lastIndexOf(" ", 200);
+      if (cut < 40) cut = 200;
+      final.push(c.slice(0, cut + 1).trim());
+      c = c.slice(cut + 1).trim();
+    }
+    if (c) final.push(c);
+  });
+  return final;
+}
+let curSay = "";
+
+const useEleven = () => !!(settings.elevenKey && settings.elevenVoiceId);
+const speakAvailable = () => TTS || useEleven();
+let currentAudio = null;
+
+function openElevenSpeaker(opts) {
+  opts = opts || {};
+  const my = ++speakTok;
+  try { if (TTS) speechSynthesis.cancel(); } catch (e) {}
+  if (currentAudio) { try { currentAudio.pause(); } catch (e) {} currentAudio = null; }
+  curSay = "";
+  const sp = { chunkQueue: [], audioQueue: [], fetching: false, playing: false, started: false, ended: false, dead: false, fallbackTried: false, buf: "" };
+  sp.finish = (msg, isErr) => {
+    sp.dead = true;
+    if (my !== speakTok) return;
+    speaking = false;
+    stopBarge();
+    setState("idle", msg, isErr);
+    if (!msg && !opts.replay) afterSpeech();
+  };
+  sp.playNext = () => {
+    if (sp.dead || my !== speakTok) return;
+    const audio = sp.audioQueue.shift();
+    if (!audio) { sp.playing = false; if (sp.ended && !sp.fetching && !sp.chunkQueue.length) sp.finish(); return; }
+    sp.playing = true;
+    currentAudio = audio;
+    audio.onended = () => { if (currentAudio === audio) currentAudio = null; sp.playing = false; sp.playNext(); };
+    audio.onerror = () => { if (currentAudio === audio) currentAudio = null; sp.playing = false; sp.playNext(); };
+    audio.play().catch(() => { if (currentAudio === audio) currentAudio = null; sp.playing = false; sp.playNext(); });
+  };
+  sp.fetchNext = async () => {
+    if (sp.dead || my !== speakTok) { sp.fetching = false; return; }
+    if (!sp.chunkQueue.length) { sp.fetching = false; if (sp.ended && !sp.playing && !sp.audioQueue.length) sp.finish(); return; }
+    sp.fetching = true;
+    const text = sp.chunkQueue.shift();
+    try {
+      const r = await fetch(
+        "https://api.elevenlabs.io/v1/text-to-speech/" + encodeURIComponent(settings.elevenVoiceId) + "/stream?output_format=mp3_44100_128",
+        { method: "POST", headers: { "xi-api-key": settings.elevenKey, "Content-Type": "application/json" },
+          body: JSON.stringify({ text, model_id: settings.elevenModel || "eleven_flash_v2_5", voice_settings: { stability: 0.5, similarity_boost: 0.75 } }) }
+      );
+      if (!r.ok) { const err = new Error("http " + r.status); err.status = r.status; throw err; }
+      const blob = await r.blob();
+      if (sp.dead || my !== speakTok) return;
+      sp.audioQueue.push(new Audio(URL.createObjectURL(blob)));
+      if (!sp.playing) sp.playNext();
+      sp.fetching = false;
+      sp.fetchNext();
+    } catch (e) {
+      sp.fetching = false;
+      if (sp.fallbackTried) return;
+      sp.fallbackTried = true;
+      const status = e && e.status;
+      const acc = curSay;
+      stopSpeech(true);
+      if (TTS && acc) { const fb = openSpeaker(opts); if (fb) { fb.push(acc); fb.end(); } }
+      else setState("idle");
+      flash(status === 401 || status === 403 ? "ElevenLabs key rejected — using your phone's voice." : "ElevenLabs unreachable — using your phone's voice.", 3400);
+    }
+  };
+  sp.enqueue = (sentence) => {
+    if (sp.dead) return;
+    const chunks = chunkForSpeech(cleanForSpeech(sentence));
+    if (!chunks.length) return;
+    if (!sp.started) {
+      sp.started = true;
+      speaking = true;
+      setState("speak", "Ember is speaking");
+      decide("speak", sentence);
+      if (settings.barge && handsOn() && SR && SECURE && !rec) startListening({ barge: true });
+      updateReadBtn();
+    }
+    chunks.forEach((c) => sp.chunkQueue.push(c));
+    if (!sp.fetching) sp.fetchNext();
+  };
+  sp.push = (delta) => {
+    if (sp.dead) return;
+    curSay += delta;
+    sp.buf += delta;
+    let m;
+    while ((m = /^[\s\S]*?[.!?…]+["')\]]?(?=\s)/.exec(sp.buf))) { sp.buf = sp.buf.slice(m[0].length); sp.enqueue(m[0]); }
+  };
+  sp.end = () => {
+    if (sp.dead) return;
+    if (sp.buf && sp.buf.trim()) sp.enqueue(sp.buf);
+    sp.buf = "";
+    sp.ended = true;
+    if (!sp.started) { sp.finish(); return; }
+    if (!sp.playing && !sp.fetching && !sp.chunkQueue.length && !sp.audioQueue.length) sp.finish();
+  };
+  return sp;
+}
+
+function openSpeaker(opts) {
+  if (!TTS) return null;
+  opts = opts || {};
+  const my = ++speakTok;
+  try { speechSynthesis.cancel(); } catch (e) {}
+  curSay = "";
+  const sp = { queue: [], busy: false, ended: false, started: false, dead: false, buf: "", watchdog: 0, voice: pickVoice() };
+  sp.finish = (msg, isErr) => {
+    clearTimeout(sp.watchdog);
+    sp.dead = true;
+    if (my !== speakTok) return;
+    speaking = false;
+    stopBarge();
+    setState("idle", msg, isErr);
+    if (!msg && !opts.replay) afterSpeech();
+  };
+  sp.pump = () => {
+    if (sp.dead || my !== speakTok || sp.busy) return;
+    if (!sp.queue.length) { if (sp.ended) sp.finish(); return; }
+    const u = new SpeechSynthesisUtterance(sp.queue.shift());
+    if (sp.voice) { u.voice = sp.voice; u.lang = sp.voice.lang; }
+    u.rate = settings.rate;
+    u.pitch = 1;
+    sp.busy = true;
+    u.onstart = () => { clearTimeout(sp.watchdog); energy = 1; };
+    u.onboundary = () => { energy = 1; };
+    u.onend = () => { sp.busy = false; clearTimeout(sp.watchdog); sp.pump(); };
+    u.onerror = (e) => {
+      if (my !== speakTok) return;
+      const code = e && e.error;
+      if (code === "canceled" || code === "interrupted") return;
+      clearTimeout(sp.watchdog);
+      if (code === "not-allowed") { sp.queue.length = 0; sp.finish("Tap Read aloud to hear me."); return; }
+      sp.busy = false;
+      sp.pump();
+    };
+    clearTimeout(sp.watchdog);
+    sp.watchdog = setTimeout(() => {
+      if (my !== speakTok) return;
+      try { speechSynthesis.cancel(); } catch (e) {}
+      sp.finish("I couldn't play audio. Check your phone's text-to-speech settings.", true);
+    }, 6000);
+    try { speechSynthesis.speak(u); } catch (e) { sp.finish(); }
+  };
+  sp.enqueue = (sentence) => {
+    if (sp.dead) return;
+    const chunks = chunkForSpeech(cleanForSpeech(sentence));
+    if (!chunks.length) return;
+    chunks.forEach((c) => sp.queue.push(c));
+    if (!sp.started) {
+      sp.started = true;
+      speaking = true;
+      setState("speak", "Ember is speaking");
+      decide("speak", sentence);
+      if (settings.barge && handsOn() && SR && SECURE && !rec) startListening({ barge: true });
+      updateReadBtn();
+      setTimeout(sp.pump, 60);
+    } else sp.pump();
+  };
+  sp.push = (delta) => {
+    if (sp.dead) return;
+    curSay += delta;
+    sp.buf += delta;
+    let m;
+    while ((m = /^[\s\S]*?[.!?…]+["')\]]?(?=\s)/.exec(sp.buf))) { sp.buf = sp.buf.slice(m[0].length); sp.enqueue(m[0]); }
+  };
+  sp.end = () => {
+    if (sp.dead) return;
+    if (sp.buf.trim()) sp.enqueue(sp.buf);
+    sp.buf = "";
+    sp.ended = true;
+    if (!sp.started) { sp.finish(); return; }
+    sp.pump();
+  };
+  return sp;
+}
+function speakText(text, opts) {
+  const sp = useEleven() ? openElevenSpeaker(opts) : openSpeaker(opts);
+  if (!sp) { setState("idle"); return false; }
+  sp.push(text);
+  sp.end();
+  return true;
+}
+function stopSpeech(quiet) {
+  speakTok++;
+  if (TTS) { try { speechSynthesis.cancel(); } catch (e) {} }
+  if (currentAudio) { try { currentAudio.pause(); } catch (e) {} currentAudio = null; }
+  const was = speaking;
+  speaking = false;
+  stopBarge();
+  if (was && state === "speak" && !quiet) setState("idle");
+  updateReadBtn();
+}
+function fillVoiceSelect() {
+  const sel = $("voiceSel");
+  if (!sel) return;
+  const keep = settings.voiceURI;
+  const lang = (navigator.language || "en").slice(0, 2).toLowerCase();
+  const list = voicesCache.slice().sort((a, b) => {
+    const A = a.lang.toLowerCase().startsWith(lang) ? 0 : /^en/i.test(a.lang) ? 1 : 2;
+    const B = b.lang.toLowerCase().startsWith(lang) ? 0 : /^en/i.test(b.lang) ? 1 : 2;
+    return A - B || a.name.localeCompare(b.name);
+  });
+  sel.innerHTML = "";
+  const auto = document.createElement("option");
+  auto.value = "";
+  auto.textContent = "Automatic";
+  sel.appendChild(auto);
+  list.slice(0, 60).forEach((v) => {
+    const o = document.createElement("option");
+    o.value = v.voiceURI;
+    o.textContent = v.name + " (" + v.lang + ")";
+    sel.appendChild(o);
+  });
+  sel.value = keep;
+  if (sel.value !== keep) sel.value = "";
+}
+
+let audioCtx = null;
+function unlockAudio() {
+  try {
+    if (!audioCtx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) audioCtx = new AC(); }
+    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+  } catch (e) {}
+  if (IS_IOS && TTS && !unlockAudio.done) {
+    unlockAudio.done = true;
+    try { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u); } catch (e) {}
+  }
+}
+function chime() {
+  try {
+    if (!audioCtx) return;
+    const t0 = audioCtx.currentTime;
+    [660, 880].forEach((f, i) => {
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = "sine";
+      o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t0 + i * 0.18);
+      g.gain.exponentialRampToValueAtTime(0.18, t0 + i * 0.18 + 0.03);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + i * 0.18 + 0.5);
+      o.connect(g);
+      g.connect(audioCtx.destination);
+      o.start(t0 + i * 0.18);
+      o.stop(t0 + i * 0.18 + 0.55);
+    });
+  } catch (e) {}
+  try { if (navigator.vibrate) navigator.vibrate([180, 90, 180]); } catch (e) {}
+}
+
+let rec = null;
+let recGot = false;
+function recLang() {
+  const l = (navigator.languages && navigator.languages[0]) || navigator.language || "en-US";
+  return l || "en-US";
+}
+let recIsBarge = false;
+const convo = { active: false };
+function startListening(opts) {
+  opts = opts || {};
+  const barge = !!opts.barge;
+  if (settings.interactOnly) return;
+  if (!SR) {
+    if (!barge) { openTypeBar(true); flash("Voice input isn't available here. Type instead.", 3200); }
+    return;
+  }
+  if (!SECURE) { if (!barge) setState("idle", "Voice needs an https link. Host the file, then open that link.", true); return; }
+  stopWake();
+  if (!barge) {
+    stopSpeech(true);
+    cancelTurn();
+    heardEl.textContent = "";
+    showReply("", "");
+    if (!opts.auto) convo.active = !!settings.convo;
+    if (rec) { const old = rec; rec = null; try { old.abort(); } catch (e) {} }
+  }
+  let r;
+  try { r = new SR(); } catch (e) { if (!barge) setState("idle", "Voice input isn't available here.", true); return; }
+  rec = r;
+  recGot = false;
+  recIsBarge = barge;
+  let detected = !barge;
+  r.lang = recLang();
+  r.interimResults = true;
+  r.continuous = false;
+  r.maxAlternatives = 1;
+  r.onstart = () => { if (rec !== r || barge) return; decide("listen"); setState("listen", "Listening…"); };
+  r.onresult = (e) => {
+    if (rec !== r) return;
+    let fin = "";
+    let interim = "";
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) fin += t; else interim += t;
+    }
+    const shown = (fin || interim).trim();
+    if (!shown) return;
+    if (barge && !detected) {
+      if (looksLikeEcho(shown)) return;
+      detected = true;
+      recIsBarge = false;
+      stopSpeech(true);
+      decide("listen");
+      setState("listen", "Listening…");
+    }
+    heardEl.textContent = shown;
+    if (fin.trim() && !recGot) { recGot = true; handleUtterance(fin.trim()); }
+  };
+  r.onerror = (e) => {
+    if (rec !== r) return;
+    const code = e && e.error;
+    if (code === "aborted") return;
+    if (barge && !detected) {
+      if (code === "not-allowed" || code === "service-not-allowed") { settings.barge = false; saveSettings(); syncSettingsUI(); }
+      return;
+    }
+    recGot = true;
+    if (code === "no-speech" && (opts.auto || convo.active)) { convo.active = false; setState("idle"); return; }
+    convo.active = false;
+    if (code === "not-allowed" || code === "service-not-allowed")
+      setState("idle", SECURE ? "Microphone is blocked. Allow it, then tap again." : "Voice needs an https link.", true);
+    else if (code === "no-speech") setState("idle", "I didn't hear anything. Tap to try again.");
+    else if (code === "audio-capture") setState("idle", "I can't find a microphone.", true);
+    else if (code === "network") setState("idle", "Voice recognition needs an internet connection.", true);
+    else setState("idle", "Something went wrong. Tap to try again.");
+  };
+  r.onend = () => {
+    if (rec !== r) return;
+    rec = null;
+    recIsBarge = false;
+    if (barge && !detected) {
+      if (state === "speak") setTimeout(() => { if (state === "speak" && !rec && settings.barge && handsOn()) startListening({ barge: true }); }, 300);
+      return;
+    }
+    if (state === "listen" && !recGot) { convo.active = false; setState("idle", "I didn't catch that. Tap to try again."); }
+  };
+  try { r.start(); } catch (e) { rec = null; recIsBarge = false; if (!barge) setState("idle"); }
+}
+function stopListening() {
+  const r = rec;
+  rec = null;
+  recIsBarge = false;
+  if (r) { try { r.abort(); } catch (e) {} }
+  if (state === "listen") setState("idle");
+}
+function stopBarge() {
+  if (!recIsBarge) return;
+  recIsBarge = false;
+  const r = rec;
+  rec = null;
+  if (r) { try { r.abort(); } catch (e) {} }
+}
+function looksLikeEcho(text) {
+  const t = text.toLowerCase();
+  const said = (curSay || lastReply || "").toLowerCase();
+  const cue = /\b(stop|wait|hold on|ember|quiet|enough|cancel|shut up)\b/;
+  if (cue.test(t) && !cue.test(said)) return false;
+  const heard = t.match(/[a-z0-9']+/g) || [];
+  if (heard.length < 3) return true;
+  const set = new Set(said.match(/[a-z0-9']+/g) || []);
+  return heard.filter((w) => set.has(w)).length / heard.length >= 0.5;
+}
+function afterSpeech() {
+  if (convo.active && settings.convo && !settings.interactOnly && SR && SECURE) {
+    setTimeout(() => { if (state === "idle" && convo.active && !rec) startListening({ auto: true }); }, 450);
+  }
+}
+
+let wakeRec = null;
+let wakeTimer = 0;
+let wakeFails = 0;
+function stopWake() {
+  clearTimeout(wakeTimer);
+  const r = wakeRec;
+  wakeRec = null;
+  if (r) { try { r.abort(); } catch (e) {} }
+}
+function scheduleWake(delay) {
+  clearTimeout(wakeTimer);
+  if (!settings.wake || settings.interactOnly || !SR || !SECURE) return;
+  wakeTimer = setTimeout(startWake, delay == null ? 600 : delay);
+}
+function startWake() {
+  if (wakeRec || !settings.wake || settings.interactOnly || !SR || !SECURE || document.hidden || state !== "idle" || rec) return;
+  let r;
+  try { r = new SR(); } catch (e) { return; }
+  wakeRec = r;
+  r.lang = recLang();
+  r.continuous = true;
+  r.interimResults = false;
+  r.onstart = () => { wakeFails = 0; };
+  r.onresult = (e) => {
+    if (wakeRec !== r) return;
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (!e.results[i].isFinal) continue;
+      const t = e.results[i][0].transcript;
+      const m = /\bember\b/i.exec(t);
+      if (!m) continue;
+      const rest = t.slice(m.index + m[0].length).replace(/^[\s,.:;!?-]+/, "").trim();
+      stopWake();
+      nudgeAwake();
+      decide("touch");
+      if (rest.length > 2) { convo.active = !!settings.convo; handleUtterance(rest); }
+      else startListening();
+      return;
+    }
+  };
+  r.onerror = (e) => {
+    if (wakeRec !== r) return;
+    const code = e && e.error;
+    if (code === "not-allowed" || code === "service-not-allowed") {
+      settings.wake = false;
+      saveSettings();
+      syncSettingsUI();
+      flash("Microphone is blocked, so the wake word is off.", 3500);
+    } else if (code !== "no-speech" && code !== "aborted") wakeFails++;
+  };
+  r.onend = () => {
+    if (wakeRec !== r) return;
+    wakeRec = null;
+    scheduleWake(wakeFails > 3 ? 5000 : 350);
+  };
+  try { r.start(); } catch (e) { wakeRec = null; scheduleWake(3000); }
+}
+
+let turn = 0;
+let abortCtl = null;
+function cancelTurn() {
+  turn++;
+  if (abortCtl) { try { abortCtl.abort(); } catch (e) {} abortCtl = null; }
+}
+function stopAll() {
+  convo.active = false;
+  stopListening();
+  stopSpeech(true);
+  cancelTurn();
+  if (state !== "idle") setState("idle");
+}
+function trimHistory() { while (history.length > 16) history.shift(); }
+
+const attach = { items: [], turns: 0 };
+const ATTACH_TURNS = 4;
+function bufToB64(buf) {
+  const bytes = new Uint8Array(buf);
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+function b64ToBytes(b64) {
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+function readAsBuffer(file) {
+  return new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => res(fr.result);
+    fr.onerror = () => rej(fr.error || new Error("read"));
+    fr.readAsArrayBuffer(file);
+  });
+}
+function readAsText(file) {
+  return new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => res(String(fr.result || ""));
+    fr.onerror = () => rej(fr.error || new Error("read"));
+    fr.readAsText(file);
+  });
+}
+async function imageToAtt(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error("image")); i.src = url; });
+    const scale = Math.min(1, 1280 / Math.max(img.naturalWidth, img.naturalHeight));
+    const w = Math.max(1, Math.round(img.naturalWidth * scale));
+    const h = Math.max(1, Math.round(img.naturalHeight * scale));
+    const cv = document.createElement("canvas");
+    cv.width = w; cv.height = h;
+    cv.getContext("2d").drawImage(img, 0, 0, w, h);
+    return { kind: "image", name: file.name || "photo", mime: "image/jpeg", data: cv.toDataURL("image/jpeg", 0.85).split(",")[1] };
+  } finally { URL.revokeObjectURL(url); }
+}
+let pdfjsPromise = null;
+function loadPdfJs() {
+  if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  if (pdfjsPromise) return pdfjsPromise;
+  pdfjsPromise = new Promise((res, rej) => {
+    const s = document.createElement("script");
+    s.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+    s.onload = () => { try { window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"; } catch (e) {} res(window.pdfjsLib); };
+    s.onerror = () => { pdfjsPromise = null; rej(new Error("pdfjs")); };
+    document.head.appendChild(s);
+  });
+  return pdfjsPromise;
+}
+async function pdfText(att) {
+  if (att.text) return att.text;
+  const lib = await loadPdfJs();
+  const doc = await lib.getDocument({ data: b64ToBytes(att.data) }).promise;
+  let out = "";
+  for (let p = 1; p <= Math.min(doc.numPages, 30) && out.length < 40000; p++) {
+    const page = await doc.getPage(p);
+    const content = await page.getTextContent();
+    out += content.items.map((i) => i.str).join(" ") + "\n";
+  }
+  att.text = out.slice(0, 40000).trim();
+  return att.text;
+}
+async function fileToAtt(file) {
+  const name = file.name || "file";
+  const type = file.type || "";
+  if (type.startsWith("image/")) return imageToAtt(file);
+  if (type === "application/pdf" || /\.pdf$/i.test(name)) {
+    if (file.size > 8 * 1024 * 1024) throw new Error("That PDF is over 8 MB.");
+    return { kind: "pdf", name, mime: "application/pdf", data: bufToB64(await readAsBuffer(file)) };
+  }
+  if (type.startsWith("text/") || /\.(txt|md|csv|json|js|ts|py|html|css|xml|log|yml|yaml|ini|c|cpp|java|rb|go|rs|sh)$/i.test(name)) {
+    if (file.size > 2 * 1024 * 1024) throw new Error("That file is over 2 MB.");
+    return { kind: "text", name, mime: "text/plain", text: (await readAsText(file)).slice(0, 30000) };
+  }
+  throw new Error("I can read photos, PDFs and text files.");
+}
+async function addFiles(fileList) {
+  const files = Array.from(fileList || []).slice(0, 4);
+  if (!files.length) return;
+  setStatus("Reading your file…");
+  let added = 0, problem = "";
+  for (const f of files) {
+    try { attach.items.push(await fileToAtt(f)); added++; }
+    catch (e) { problem = (e && e.message) || "I couldn't read that file."; }
+  }
+  attach.items = attach.items.slice(-4);
+  if (added) attach.turns = ATTACH_TURNS;
+  renderChips();
+  if (state === "idle") setState("idle", added ? "Got it. Ask me about " + (added > 1 ? "them." : "it.") : problem, !added);
+  if (added && problem) flash(problem, 3000);
+  if (added && SR && SECURE && state === "idle") startListening();
+}
+function takeAttachments() { return attach.turns > 0 ? attach.items.slice() : []; }
+function usedAttachments() {
+  if (!attach.items.length) return;
+  attach.turns--;
+  if (attach.turns <= 0) { attach.items = []; renderChips(); }
+}
+
+let convos = store.get("convos", []);
+if (!Array.isArray(convos)) convos = [];
+let curId = store.get("curId", "");
+function saveConvos() {
+  convos = convos.slice(0, 60);
+  convos.forEach((c) => { if (c.msgs.length > 200) c.msgs = c.msgs.slice(-200); });
+  store.set("convos", convos);
+  store.set("curId", curId);
+}
+function createConvo() {
+  const c = { id: "c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), title: "", created: Date.now(), updated: Date.now(), msgs: [] };
+  convos.unshift(c);
+  curId = c.id;
+  return c;
+}
+function logMsg(role, content) {
+  let c = convos.find((x) => x.id === curId);
+  if (!c) c = createConvo();
+  c.msgs.push({ role, content, t: Date.now() });
+  if (!c.title && role === "user") c.title = content.replace(/\s+/g, " ").slice(0, 48);
+  c.updated = Date.now();
+  const i = convos.indexOf(c);
+  if (i > 0) { convos.splice(i, 1); convos.unshift(c); }
+  saveConvos();
+  history.push({ role, content });
+  trimHistory();
+}
+function loadConvoIntoHistory(id) {
+  history.length = 0;
+  const c = convos.find((x) => x.id === id);
+  if (c) c.msgs.slice(-12).forEach((m) => history.push({ role: m.role, content: m.content }));
+}
+function startNewConvo() {
+  curId = "";
+  history.length = 0;
+  store.set("curId", "");
+  heardEl.textContent = "";
+  showReply("", "");
+  lastReply = "";
+}
+(function restoreConvo() {
+  const c = convos.find((x) => x.id === curId);
+  if (c && Date.now() - c.updated < 2 * 3600 * 1000) loadConvoIntoHistory(c.id);
+  else curId = "";
+})();
+
+let lastUserLow = "";
+async function handleUtterance(raw) {
+  const text = String(raw || "").trim();
+  if (!text) return;
+  nudgeAwake();
+  stopSpeech(true);
+  stopWake();
+  if (rec) { const r = rec; rec = null; recIsBarge = false; try { r.abort(); } catch (e) {} }
+  cancelTurn();
+  const my = turn;
+  abortCtl = typeof AbortController !== "undefined" ? new AbortController() : null;
+  const atts = takeAttachments();
+  lastUserLow = text.toLowerCase();
+  logMsg("user", text + (atts.length ? " [attached: " + atts.map((a) => a.name).join(", ") + "]" : ""));
+  heardEl.textContent = text;
+  showReply("", "");
+  setState("think", atts.length ? "Reading…" : "Thinking…");
+  decide("think");
+  let sp = null;
+  let acc = "";
+  const ctl = {
+    signal: abortCtl ? abortCtl.signal : undefined,
+    attachments: atts,
+    status: (s) => { if (turn === my && state === "think") setStatus(s); },
+    onDelta: (d) => {
+      if (turn !== my) return;
+      acc += d;
+      replyWrap.hidden = false;
+      replyEl.textContent = acc;
+      replyEl.scrollTop = replyEl.scrollHeight;
+      if (settings.autoRead && speakAvailable()) { if (!sp) sp = (useEleven() ? openElevenSpeaker() : openSpeaker()); if (sp) sp.push(d); }
+    },
+    reset: () => { acc = ""; if (sp) { stopSpeech(true); sp = null; } showReply("", ""); }
+  };
+  let result;
+  try { result = await respond(text, ctl); }
+  catch (e) {
+    if (turn !== my) return;
+    result = { text: "Hmm, I lost my train of thought. Could you say that again?", source: "" };
+  }
+  if (turn !== my) return;
+  abortCtl = null;
+  usedAttachments();
+  deliver(result, sp);
+}
+
+const TRANSIENT_FACT = /^(?:a |an |the |little |bit |lot |tad |very |so |really |quite |pretty |kind of |sort of |just )*\s*(?:tired|hungry|bored|happy|sad|sick|busy|late|early|ready|done|fine|okay|ok|good|bad|great|excited|nervous|worried|scared|angry|upset|confused|lost|stuck|new|back|here|there|free|around|in|out|on|off|going|doing|trying|hoping|thinking|feeling|getting|being|having|sorry|sure|glad|afraid|curious|wondering|looking|waiting|question|questions|problem|problems|minute|minutes|moment|second|seconds|hour|day|week|month|year|idea|thought|feeling|thing|things|issue|issues|story|joke|reason|way|point)\b/i;
+const NOUN_PHRASE = /^(?:a |an |the |my |your |two |three |four |five |\d+ )?[a-z][a-z'-]*(?:\s+[a-z][a-z'-]*){0,3}$/i;
+function looksLikeFact(phrase) {
+  const p = phrase.trim();
+  if (p.length < 3 || p.length > 40) return false;
+  if (TRANSIENT_FACT.test(p)) return false;
+  if (!/[a-z]/i.test(p)) return false;
+  return NOUN_PHRASE.test(p);
+}
+function learnFromChat(userText, assistantText) {
+  if (!userText || userText.length < 4) return;
+  const t = userText.trim();
+  let changed = false;
+  let m = /\bi (?:really |truly |absolutely )?(?:like|love|prefer|enjoy|hate|dislike)\s+([^,.!?]{2,40})$/i.exec(t);
+  if (m && looksLikeFact(m[1])) {
+    const p = m[1].trim();
+    const key = p.toLowerCase().slice(0, 40);
+    if (!memory.preferences[key]) { memory.preferences[key] = p; changed = true; }
+  }
+  m = /\bi(?:'m| am) (?:working on|trying to|planning to|learning)\s+([^,.!?]{3,50})$/i.exec(t);
+  if (m) {
+    const g = m[1].trim();
+    if (g.length >= 3 && !memory.goals.some(x => x.text.toLowerCase() === g.toLowerCase())) {
+      memory.goals.push({ text: g, added: Date.now() });
+      changed = true;
+    }
+  }
+  m = /\bi(?:'m| am) (?:a |an )([^,.!?]{2,40})$/i.exec(t)
+    || /\bi have (?:a |an |two |three |four |five |\d+ )([^,.!?]{2,40})$/i.exec(t)
+    || /\bi own (?:a |an |two |three |\d+ )([^,.!?]{2,40})$/i.exec(t);
+  if (m && looksLikeFact(m[1])) {
+    const f = m[1].trim();
+    const key = f.toLowerCase().slice(0, 40);
+    if (!memory.facts[key]) { memory.facts[key] = f; changed = true; }
+  }
+  if (history.length >= 6 && history.length % 6 === 0) {
+    const recent = history.slice(-6).map(m => (m.role === "user" ? "User: " : "Ember: ") + m.content.slice(0, 80)).join(" | ");
+    memory.lastSummary = recent.slice(0, 220);
+    changed = true;
+  }
+  if (changed) saveMemory();
+}
+
+function deliver(res, sp) {
+  const text = res.text || "I'm not sure what to say to that.";
+  lastReply = text;
+  logMsg("assistant", text);
+  if (lastUserLow && text) learnFromChat(lastUserLow, text);
+  if (/^(?:bye|goodbye|good night|goodnight|see you|see ya|stop|cancel|never ?mind|that's all|no thanks|no thank you|quiet|be quiet|enough)\b/.test(lastUserLow)) convo.active = false;
+  showReply(text, res.source || "");
+  if (sp) { sp.end(); return; }
+  if (settings.autoRead && speakAvailable()) speakText(text);
+  else { setState("idle"); decide("react", text); }
+}
+
+function announce(text, label) {
+  nudgeAwake(true);
+  chime();
+  stopListening();
+  stopSpeech(true);
+  cancelTurn();
+  convo.active = false;
+  heardEl.textContent = "";
+  lastReply = text;
+  showReply(text, label || "");
+  if (settings.autoRead && speakAvailable()) setTimeout(() => speakText(text, { replay: true }), 700);
+  else setState("idle", text);
+}
+
+/* =====================================================================
+   B. BRAIN
+   ===================================================================== */
+const NUM_WORDS = { zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19, twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90 };
+const hasNum = (w) => Object.prototype.hasOwnProperty.call(NUM_WORDS, w);
+function wordsToDigits(str) {
+  const toks = str.replace(/([a-z])-([a-z])/gi, "$1 $2").split(/\s+/).filter(Boolean);
+  const out = [];
+  let run = null;
+  const end = () => { if (run) { out.push(String(run.total + run.cur)); run = null; } };
+  for (let i = 0; i < toks.length; i++) {
+    const w = toks[i].toLowerCase().replace(/[,.?!]+$/, "");
+    const isNum = hasNum(w);
+    if (isNum || w === "hundred" || w === "thousand" || w === "million") {
+      if (!run) run = { total: 0, cur: 0 };
+      if (isNum) run.cur += NUM_WORDS[w];
+      else if (w === "hundred") run.cur = (run.cur || 1) * 100;
+      else if (w === "thousand") { run.total += (run.cur || 1) * 1000; run.cur = 0; }
+      else { run.total += (run.cur || 1) * 1000000; run.cur = 0; }
+    } else if (w === "and" && run && i + 1 < toks.length && (hasNum(toks[i + 1].toLowerCase()) )) {
+      /* skip */
+    } else { end(); out.push(toks[i]); }
+  }
+  end();
+  return out.join(" ");
+}
+function norm(t) {
+  let s = String(t).toLowerCase().replace(/[\u2018\u2019]/g, "'").replace(/\s+/g, " ").trim();
+  s = s.replace(/^(?:(?:hey|hi|ok|okay|yo)\s+ember\b|ember\b(?=[,.!:?]|$))[\s,.!:]*/, "");
+  s = s.trim();
+  return s || "hello";
+}
+const words = (s) => s.split(/\s+/).filter(Boolean);
+const STOP = new Set("the a an of to in on at for and or is are was were be do does did what who whom whose when where why how which that this these those it its i me my you your we our they them their with about from as by if so than then there here can could would should will just tell explain describe define please know".split(" "));
+const keyTokens = (s) => (s.toLowerCase().match(/[a-z0-9]+/g) || []).filter((w) => w.length > 2 && !STOP.has(w));
+function hourGreeting() {
+  const h = new Date().getHours();
+  return h < 5 ? "Hello, night owl" : h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+}
+function cap(s) { return s.replace(/\b([a-z])/g, (m) => m.toUpperCase()); }
+const withName = (s) => (userName ? s.replace(/\.$/, "") + ", " + userName + "." : s);
+
+function evalMath(src) {
+  const s = src.replace(/\s+/g, "");
+  let i = 0;
+  const peek = () => s[i];
+  function num() {
+    const m = /^(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?/i.exec(s.slice(i));
+    if (!m) throw new Error("num");
+    i += m[0].length;
+    let v = parseFloat(m[0]);
+    if (peek() === "%") { i++; v /= 100; }
+    return v;
+  }
+  function primary() {
+    if (peek() === "(") { i++; const v = expr(); if (peek() !== ")") throw new Error("paren"); i++; return v; }
+    if (s.startsWith("sqrt(", i)) { i += 5; const v = expr(); if (peek() !== ")") throw new Error("paren"); i++; if (v < 0) throw new Error("neg"); return Math.sqrt(v); }
+    return num();
+  }
+  function power() { const b = primary(); if (peek() === "^") { i++; return Math.pow(b, unary()); } return b; }
+  function unary() { if (peek() === "-") { i++; return -unary(); } if (peek() === "+") { i++; return unary(); } return power(); }
+  function term() {
+    let v = unary();
+    while (peek() === "*" || peek() === "/") { const op = s[i++]; const r = unary(); if (op === "*") v *= r; else { if (r === 0) throw new Error("div0"); v /= r; } }
+    return v;
+  }
+  function expr() {
+    let v = term();
+    while (peek() === "+" || peek() === "-") { const op = s[i++]; const r = term(); v = op === "+" ? v + r : v - r; }
+    return v;
+  }
+  const v = expr();
+  if (i !== s.length) throw new Error("trail");
+  return v;
+}
+function fmtNum(v) {
+  if (!isFinite(v)) return String(v);
+  const r = parseFloat(v.toPrecision(10));
+  if (Math.abs(r) >= 1e15 || (Math.abs(r) < 1e-6 && r !== 0)) return r.toExponential(3);
+  return Math.abs(r) >= 1000 ? r.toLocaleString("en-US", { maximumFractionDigits: 6 }) : String(r);
+}
+function tryMath(low) {
+  let m = wordsToDigits(low).replace(/(\d),(\d{3})/g, "$1$2").replace(/[?!]/g, " ");
+  for (let n = 0; n < 3; n++) {
+    m = m.replace(/^(?:please\s+)?(?:what(?:'s| is| are| does)|whats|calculate|compute|solve|work out|how much is|how many is|tell me|give me|the answer to|equals?)\s+/, "");
+  }
+  m = m.replace(/\s*(?:equals?|is equal to)$/, "").trim();
+  m = m
+    .replace(/(\d+(?:\.\d+)?)\s*(?:%|percent)\s*of\s*(\d+(?:\.\d+)?)/g, "($1/100*$2)")
+    .replace(/square root of\s*(\d+(?:\.\d+)?)/g, "sqrt($1)")
+    .replace(/(\d+(?:\.\d+)?)\s*squared/g, "($1^2)")
+    .replace(/(\d+(?:\.\d+)?)\s*cubed/g, "($1^3)")
+    .replace(/to the power of|raised to the power of|raised to/g, "^")
+    .replace(/\b(?:plus|added to)\b/g, "+")
+    .replace(/\bminus\b/g, "-")
+    .replace(/\b(?:times|multiplied by|multiply by)\b|[×]/g, "*")
+    .replace(/\b(?:divided by|over)\b|[÷]/g, "/")
+    .replace(/(\d)\s*x\s*(\d)/g, "$1*$2");
+  if (/[a-wyz]/i.test(m.replace(/sqrt/g, "")) || /x/i.test(m)) return null;
+  if (!/\d/.test(m) || !/[+\-*/^()%]/.test(m.replace(/^-/, "")) ) return null;
+  if (!/^[\d\s+\-*/^().%]*(?:sqrt\([\d\s+\-*/^().%]*\)[\d\s+\-*/^().%]*)*$/.test(m)) return null;
+  try {
+    const v = evalMath(m);
+    if (!isFinite(v)) return null;
+    return pickFresh("math", ["That comes to ", "It's ", "The answer is ", "That's "]) + fmtNum(v) + ".";
+  } catch (e) {
+    if (e && e.message === "div0") return "That one doesn't work out. You can't divide by zero.";
+    if (e && e.message === "neg") return "There's no real square root of a negative number.";
+    return null;
+  }
+}
+
+const UNIT_TABLE = {};
+function addUnit(group, factor, label, names) { names.forEach((n) => { UNIT_TABLE[n] = { group, factor, label }; }); }
+addUnit("length", 1, "meters", ["m", "meter", "meters", "metre", "metres"]);
+addUnit("length", 1000, "kilometers", ["km", "kms", "kilometer", "kilometers", "kilometre", "kilometres"]);
+addUnit("length", 0.01, "centimeters", ["cm", "centimeter", "centimeters", "centimetre", "centimetres"]);
+addUnit("length", 0.001, "millimeters", ["mm", "millimeter", "millimeters"]);
+addUnit("length", 1609.344, "miles", ["mi", "mile", "miles"]);
+addUnit("length", 0.3048, "feet", ["ft", "foot", "feet"]);
+addUnit("length", 0.0254, "inches", ["inch", "inches"]);
+addUnit("length", 0.9144, "yards", ["yd", "yard", "yards"]);
+addUnit("mass", 1, "kilograms", ["kg", "kgs", "kilo", "kilos", "kilogram", "kilograms"]);
+addUnit("mass", 0.001, "grams", ["g", "gram", "grams"]);
+addUnit("mass", 0.45359237, "pounds", ["lb", "lbs", "pound", "pounds"]);
+addUnit("mass", 0.028349523, "ounces", ["oz", "ounce", "ounces"]);
+addUnit("volume", 1, "liters", ["l", "liter", "liters", "litre", "litres"]);
+addUnit("volume", 0.001, "milliliters", ["ml", "milliliter", "milliliters"]);
+addUnit("volume", 3.785411784, "gallons", ["gal", "gallon", "gallons"]);
+addUnit("volume", 0.2365882365, "cups", ["cup", "cups"]);
+addUnit("speed", 0.277778, "kilometers per hour", ["kph", "kmh", "kmph"]);
+addUnit("speed", 0.44704, "miles per hour", ["mph"]);
+addUnit("speed", 1, "meters per second", ["mps"]);
+addUnit("temp", 0, "degrees Celsius", ["c", "celsius", "centigrade"]);
+addUnit("temp", 1, "degrees Fahrenheit", ["f", "fahrenheit"]);
+addUnit("temp", 2, "kelvin", ["k", "kelvin"]);
+function unitLabel(u, v) {
+  if (Math.abs(v) !== 1) return u.label;
+  if (u.label === "feet") return "foot";
+  if (/ per |^degrees|^kelvin/.test(u.label) || !/s$/.test(u.label)) return u.label;
+  return u.label.slice(0, -1);
+}
+function convertUnits(v, from, to) {
+  if (from.group !== to.group) return null;
+  if (from.group === "temp") {
+    const c = from.factor === 0 ? v : from.factor === 1 ? (v - 32) * 5 / 9 : v - 273.15;
+    return to.factor === 0 ? c : to.factor === 1 ? c * 9 / 5 + 32 : c + 273.15;
+  }
+  return v * from.factor / to.factor;
+}
+function tryUnits(low) {
+  let s = wordsToDigits(low).replace(/km\s*\/\s*h/g, "kph").replace(/mi\s*\/\s*h/g, "mph").replace(/m\s*\/\s*s/g, "mps").replace(/°/g, " ").replace(/degrees?\s+/g, "").replace(/[?!,]/g, " ");
+  let value, a, b;
+  let m = /how many ([a-z]+) (?:are |is )?(?:in|is) (?:an? |one )?(-?\d+(?:\.\d+)?)?\s*([a-z]+)/.exec(s);
+  if (m && UNIT_TABLE[m[1]] && UNIT_TABLE[m[3]]) { b = UNIT_TABLE[m[1]]; a = UNIT_TABLE[m[3]]; value = m[2] ? parseFloat(m[2]) : 1; }
+  else {
+    m = /(-?\d+(?:\.\d+)?)\s*([a-z]+)\s+(?:to|in|into|as)\s+(?:the\s+)?([a-z]+)/.exec(s);
+    if (m && UNIT_TABLE[m[2]] && UNIT_TABLE[m[3]]) { value = parseFloat(m[1]); a = UNIT_TABLE[m[2]]; b = UNIT_TABLE[m[3]]; }
+  }
+  if (!a || !b || a === b) return null;
+  const r = convertUnits(value, a, b);
+  if (r == null || !isFinite(r)) return null;
+  const rr = parseFloat(r.toPrecision(4));
+  return fmtNum(value) + " " + unitLabel(a, value) + " is about " + fmtNum(rr) + " " + unitLabel(b, rr) + ".";
+}
+
+const timers = [];
+let timerId = 0;
+function parseDuration(s) {
+  const re = /\b(\d+(?:\.\d+)?|an?|half an?)\s*(seconds?|secs?|minutes?|mins?|hours?|hrs?)\b/g;
+  let total = 0, found = false, m;
+  while ((m = re.exec(s))) {
+    let n = m[1];
+    n = /^an?$/.test(n) ? 1 : /^half/.test(n) ? 0.5 : parseFloat(n);
+    const u = m[2][0];
+    total += n * (u === "s" ? 1000 : u === "m" ? 60000 : 3600000);
+    found = true;
+  }
+  return found ? Math.round(total) : 0;
+}
+function fmtDuration(ms) {
+  let s = Math.max(1, Math.round(ms / 1000));
+  const h = Math.floor(s / 3600); s -= h * 3600;
+  const m = Math.floor(s / 60); s -= m * 60;
+  const parts = [];
+  if (h) parts.push(h + (h === 1 ? " hour" : " hours"));
+  if (m) parts.push(m + (m === 1 ? " minute" : " minutes"));
+  if (s && !h) parts.push(s + (s === 1 ? " second" : " seconds"));
+  return parts.join(" and ") || "a moment";
+}
+function scheduleTimer(t) {
+  t.handle = setTimeout(() => {
+    const i = timers.indexOf(t);
+    if (i >= 0) timers.splice(i, 1);
+    saveTimers();
+    announce(t.label ? "Reminder: " + t.label + "." : "Your " + fmtDuration(t.ms) + " timer is up.", "timer");
+  }, Math.max(0, t.end - Date.now()));
+}
+function saveTimers() { store.set("timers", timers.map((t) => ({ end: t.end, ms: t.ms, label: t.label }))); }
+function restoreTimers() {
+  const saved = store.get("timers", []);
+  if (!Array.isArray(saved)) return;
+  const now = Date.now();
+  const missed = [];
+  saved.forEach((s) => {
+    if (!s || typeof s.end !== "number") return;
+    if (s.end <= now) { missed.push(s); return; }
+    const t = { id: ++timerId, end: s.end, ms: s.ms || s.end - now, label: s.label || "", handle: 0 };
+    scheduleTimer(t);
+    timers.push(t);
+  });
+  saveTimers();
+  if (missed.length) {
+    setTimeout(() => announce(missed.length === 1
+      ? (missed[0].label ? "While you were away, a reminder went off: " + missed[0].label + "." : "While you were away, your timer finished.")
+      : "While you were away, " + missed.length + " timers finished.", "timer"), 1500);
+  }
+}
+function catchUpTimers() {
+  if (!timers.length) return;
+  const now = Date.now();
+  const stillRunning = [];
+  timers.forEach((t) => {
+    clearTimeout(t.handle);
+    if (t.end <= now) {
+      setTimeout(() => announce(t.label ? "Reminder: " + t.label + "." : "Your " + fmtDuration(t.ms) + " timer is up.", "timer"), 200);
+    } else { scheduleTimer(t); stillRunning.push(t); }
+  });
+  timers.length = 0;
+  timers.push(...stillRunning);
+  saveTimers();
+}
+function tryTimer(low) {
+  const s = wordsToDigits(low);
+  if (/\b(?:cancel|stop|clear|delete|remove)\b.*\b(?:timers?|reminders?|alarms?)\b/.test(s)) {
+    if (!timers.length) return "You don't have any timers running.";
+    const n = timers.length;
+    while (timers.length) clearTimeout(timers.pop().handle);
+    saveTimers();
+    return n === 1 ? "Okay, I cancelled your timer." : "Okay, I cancelled all " + n + " timers.";
+  }
+  if (/\b(?:how long|how much time|time left|time remaining)\b.*\b(?:timer|left|remaining)\b|\bcheck (?:my |the )?timer\b|\b(?:show|display|see)\b.*\b(?:timer|countdown|count ?down)\b|\bcountdown\b|\btime countdown\b/.test(s)) {
+    if (!timers.length) return "You don't have any timers running. Say something like, set a timer for three minutes.";
+    const t = timers.slice().sort((a, b) => a.end - b.end)[0];
+    const left = Math.max(0, t.end - Date.now());
+    return formatCountdown(left) + " left on my face" + (t.label ? " until " + t.label : "") + ".";
+  }
+  const isTimer = /\btimer\b/.test(s) && /\b(?:set|start|create|make|put|begin|run)\b|\bfor\b/.test(s);
+  const isRemind = /\bremind me\b/.test(s) && /\b(?:in|after)\b/.test(s);
+  if (!isTimer && !isRemind) return null;
+  const ms = parseDuration(s);
+  if (!ms) return isTimer ? "For how long? Say something like, set a timer for five minutes." : null;
+  if (ms > 24 * 3600000) return "I can only keep timers up to a day.";
+  let label = "";
+  const lm = /remind me (?:in|after) .*?(?:seconds?|secs?|minutes?|mins?|hours?|hrs?)\s*(?:to|that|about)\s+(.+)$/.exec(s);
+  if (lm) label = lm[1].replace(/[.?!]+$/, "").replace(/\bmy\b/g, "your").replace(/\bme\b/g, "you").replace(/\bi\b/g, "you");
+  const t = { id: ++timerId, end: Date.now() + ms, ms, label, handle: 0 };
+  scheduleTimer(t);
+  timers.push(t);
+  saveTimers();
+  return label
+    ? "Okay, I'll remind you to " + label + " in " + fmtDuration(ms) + ". Keep this page open."
+    : "Okay, timer set for " + fmtDuration(ms) + ". Keep this page open.";
+}
+function getActiveTimer() {
+  const now = Date.now();
+  for (let i = timers.length - 1; i >= 0; i--) if (timers[i].end <= now) timers.splice(i, 1);
+  if (!timers.length) return null;
+  return timers.slice().sort((a, b) => a.end - b.end)[0];
+}
+function formatCountdown(ms) {
+  let s = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(s / 3600); s -= h * 3600;
+  const m = Math.floor(s / 60); s -= m * 60;
+  const pad = (n) => (n < 10 ? "0" + n : String(n));
+  if (h > 0) return h + ":" + pad(m) + ":" + pad(s);
+  return pad(m) + ":" + pad(s);
+}
+function tryRandom(low) {
+  const s = wordsToDigits(low);
+  if (/\b(?:flip|toss)\b.*\bcoin\b/.test(s)) return Math.random() < 0.5 ? "Heads." : "Tails.";
+  const d = /\broll\s+(?:an?\s+|the\s+)?(\d+)?\s*(?:dice|die|d(\d+))\b/.exec(s);
+  if (d) {
+    const count = clamp(parseInt(d[1] || "1", 10), 1, 10);
+    const sides = clamp(parseInt(d[2] || "6", 10), 2, 1000);
+    const rolls = Array.from({ length: count }, () => 1 + Math.floor(Math.random() * sides));
+    if (count === 1) return "You rolled a " + rolls[0] + ".";
+    return "You rolled " + rolls.join(", ") + ". That's " + rolls.reduce((a, b) => a + b, 0) + " in total.";
+  }
+  const r = /\b(?:pick|choose|give me|say|random)\b.*?\bnumber\b.*?(?:between|from)\s+(-?\d+)\s+(?:and|to)\s+(-?\d+)/.exec(s);
+  if (r) {
+    const lo = Math.min(+r[1], +r[2]);
+    const hi = Math.max(+r[1], +r[2]);
+    return "How about " + (lo + Math.floor(Math.random() * (hi - lo + 1))) + "?";
+  }
+  return null;
+}
+function tryNotes(rawText, low) {
+  const text = rawText.replace(/[\u2019]/g, "'").replace(/^(?:(?:hey|hi|ok|okay|yo)\s+ember\b|ember\b(?=[,.!:?]|$))[\s,.!:]*/i, "").trim();
+  let m = /\b(?:my name is|i am called|i'm called)\s+([a-z][a-z' -]{0,24}?)\s*[.!?]*$/i.exec(text)
+    || /^(?:please\s+)?call me\s+(?!(?:later|back|when|if|tomorrow|now|maybe|a |an |the |at |in |on |tonight|soon)\b)([a-z][a-z' -]{0,24}?)\s*[.!?]*$/i.exec(text);
+  if (m && !/^(?:not|so|very|a|an|the)\b/i.test(m[1])) {
+    userName = cap(m[1].trim().toLowerCase());
+    store.set("name", userName);
+    memory.facts.name = userName;
+    saveMemory();
+    return "Nice to meet you, " + userName + ". I'll remember that.";
+  }
+  if (/^(?:what(?:'s| is) my name|do you know my name|who am i)\b/.test(low))
+    return userName ? "You're " + userName + "." : "You haven't told me yet. Say, my name is, and then your name.";
+  let pm = /^(?:i (?:like|love|prefer|enjoy)|my (?:favorite|favourite) (?:is|are))\s+(.+)$/i.exec(text);
+  if (pm) {
+    const pref = pm[1].replace(/[.?!]+$/, "").trim();
+    if (pref.length > 1) {
+      memory.preferences[pref.toLowerCase().slice(0, 40)] = pref;
+      saveMemory();
+      return "I'll remember you like " + pref + ".";
+    }
+  }
+  pm = /^(?:i(?:'m| am) working on|my (?:goal|project|plan) is)\s+(.+)$/i.exec(text);
+  if (pm) {
+    const g = pm[1].replace(/[.?!]+$/, "").trim();
+    if (g.length > 2) {
+      memory.goals.push({ text: g, added: Date.now() });
+      memory.goals = memory.goals.slice(-8);
+      saveMemory();
+      return "Got it. I'll keep " + g + " in mind.";
+    }
+  }
+  m = /^(?:please\s+)?(?:remember|note|make a note|write down|don't forget)\s+(?:that\s+)?(.+)$/i.exec(text);
+  if (m) {
+    const note = m[1].replace(/[.?!]+$/, "").trim();
+    if (note.length < 2) return "What should I remember?";
+    notes.push(note);
+    saveNotes();
+    return pickFresh("note", ["Got it. I'll remember that.", "Okay, noted.", "Saved. I'll keep that for you."]);
+  }
+  if (/\b(?:forget everything|clear (?:my |all )?(?:memory|notes)|delete (?:my |all )?(?:memory|notes)|erase (?:my |all )?(?:memory|notes))\b/.test(low)) {
+    notes = [];
+    saveNotes();
+    return "Done. I cleared all my notes.";
+  }
+  if (/^forget (?:that|it|the last (?:thing|note))\b/.test(low)) {
+    if (!notes.length) return "I don't have any notes to forget.";
+    notes.pop();
+    saveNotes();
+    return "Okay, I forgot the last note.";
+  }
+  if (/\b(?:what do you remember|what did i tell you|what are my notes|read my notes|list my notes|show my notes|what do you know about me)\b/.test(low)) {
+    const parts = [];
+    if (userName) parts.push("Your name is " + userName);
+    const prefs = Object.values(memory.preferences).slice(-5);
+    if (prefs.length) parts.push("You like " + prefs.join(", "));
+    if (memory.goals.length) parts.push("You're working on " + memory.goals.slice(-3).map(g => g.text).join(", "));
+    if (notes.length) parts.push("Notes: " + notes.slice(-4).join(". "));
+    return parts.length ? parts.join(". ") + "." : "I don't have much yet. Tell me your name, things you like, or say remember that.";
+  }
+  if (notes.length && /^(?:where|what|when|who|which)\b.*\b(?:my|i|our)\b/.test(low)) {
+    const q = keyTokens(low);
+    let best = null, score = 0;
+    notes.forEach((n) => {
+      const toks = keyTokens(n);
+      const s = q.filter((w) => toks.includes(w)).length;
+      if (s > score) { score = s; best = n; }
+    });
+    if (best && score >= 1) return "You told me: " + best + ".";
+  }
+  return null;
+}
+function tryTime(low) {
+  if (/\btime\b.*\b(?:in|at|for)\s+[a-z]/.test(low) && !/\bat the moment\b/.test(low)) return null;
+  if (/^(?:what(?:'s| is) the (?:current )?time|what time is it|what's the time|do you have the time|tell me the time|current time)\b/.test(low))
+    return "It's " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) + ".";
+  if (/^(?:what(?:'s| is) (?:the |today's )?date|what day is (?:it|today)|what's today|today's date|what is today|what day of the week)\b/.test(low))
+    return "Today is " + new Date().toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" }) + ".";
+  if (/^what year is it\b/.test(low)) return "It's " + new Date().getFullYear() + ".";
+  return null;
+}
+async function fetchJSON(url, signal, ms) {
+  const ctl = new AbortController();
+  const t = setTimeout(() => ctl.abort(), ms || 8000);
+  if (signal) { if (signal.aborted) ctl.abort(); else signal.addEventListener("abort", () => ctl.abort(), { once: true }); }
+  try {
+    const r = await fetch(url, { signal: ctl.signal });
+    if (!r.ok) { const e = new Error("http " + r.status); e.status = r.status; throw e; }
+    return await r.json();
+  } finally { clearTimeout(t); }
+}
+const online = () => navigator.onLine !== false;
+
+const WMO = { 0: "clear", 1: "mostly clear", 2: "partly cloudy", 3: "overcast", 45: "foggy", 48: "foggy", 51: "drizzling lightly", 53: "drizzling", 55: "drizzling heavily", 61: "raining lightly", 63: "raining", 65: "raining heavily", 71: "snowing lightly", 73: "snowing", 75: "snowing heavily", 80: "showery", 81: "showery", 82: "stormy with heavy showers", 85: "snowy", 86: "snowy", 95: "thundery", 96: "thundery with hail", 99: "thundery with hail" };
+const WMO_DAY = { 0: "clear skies", 1: "mostly clear skies", 2: "partly cloudy skies", 3: "overcast skies", 45: "fog", 48: "fog", 51: "light drizzle", 53: "drizzle", 55: "heavy drizzle", 61: "light rain", 63: "rain", 65: "heavy rain", 71: "light snow", 73: "snow", 75: "heavy snow", 80: "rain showers", 81: "rain showers", 82: "heavy showers", 85: "snow showers", 86: "snow showers", 95: "thunderstorms", 96: "thunderstorms with hail", 99: "thunderstorms with hail" };
+function getPosition() {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) return reject(new Error("no geo"));
+    navigator.geolocation.getCurrentPosition((p) => resolve(p.coords), reject, { timeout: 7000, maximumAge: 600000 });
+  });
+}
+async function weatherReply(place, tomorrow, ctl) {
+  if (!online()) return { text: "I need an internet connection to check the weather.", source: "" };
+  ctl.status("Checking the weather…");
+  let lat, lon, name = "";
+  if (place) {
+    const g = await fetchJSON("https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(place) + "&count=1&language=en&format=json", ctl.signal);
+    const hit = g.results && g.results[0];
+    if (!hit) return { text: "I couldn't find a place called " + place + ". Try the city name again.", source: "" };
+    lat = hit.latitude; lon = hit.longitude; name = hit.name + (hit.country && hit.country !== hit.name ? ", " + hit.country : "");
+  } else {
+    try { const c = await getPosition(); lat = c.latitude; lon = c.longitude; name = ""; }
+    catch (e) { pending = { type: "city", tomorrow }; return { text: "Which city should I check?", source: "" }; }
+  }
+  const useF = /^en-US/i.test(navigator.language || "");
+  const u = useF ? "&temperature_unit=fahrenheit&wind_speed_unit=mph" : "";
+  const w = await fetchJSON("https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current=temperature_2m,apparent_temperature,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=2" + u, ctl.signal);
+  const unit = useF ? " degrees Fahrenheit" : " degrees";
+  const where = name ? " in " + name : " where you are";
+  const d = w.daily;
+  if (tomorrow && d && d.time.length > 1) {
+    const rain = d.precipitation_probability_max && d.precipitation_probability_max[1];
+    return { text: "Tomorrow" + where + ", expect " + (WMO_DAY[d.weather_code[1]] || "mixed weather") + ", with a high of " + Math.round(d.temperature_2m_max[1]) + " and a low of " + Math.round(d.temperature_2m_min[1]) + unit + "." + (rain != null ? " The chance of rain is " + rain + " percent." : ""), source: "Open-Meteo" };
+  }
+  const c = w.current;
+  const rain = d && d.precipitation_probability_max && d.precipitation_probability_max[0];
+  return { text: "It's " + Math.round(c.temperature_2m) + unit + " and " + (WMO[c.weather_code] || "mixed") + where + " right now, feeling like " + Math.round(c.apparent_temperature) + ". Today's high is " + Math.round(d.temperature_2m_max[0]) + " and the low is " + Math.round(d.temperature_2m_min[0]) + "." + (rain != null && rain >= 30 ? " There's a " + rain + " percent chance of rain." : ""), source: "Open-Meteo" };
+}
+function weatherIntent(low) {
+  if (!/\b(?:weather|forecast|temperature|raining|snowing|umbrella|will it (?:rain|snow)|going to (?:rain|snow)|how (?:hot|cold|warm) is it|is it (?:hot|cold|warm|sunny|cloudy|windy|rainy))\b/.test(low)) return null;
+  const tomorrow = /\btomorrow\b/.test(low);
+  const m = /\b(?:in|at|for|near|around)\s+([a-z][a-z .'-]{1,40}?)(?:\s+(?:today|tonight|tomorrow|now|right now|currently|this (?:morning|afternoon|evening|week)))*\s*[?.!]*$/.exec(low);
+  let place = m ? m[1].trim() : "";
+  if (/^(?:the|my|this|here|there|general|that|a)\b/.test(place) && !/^(?:the )?(?:hague|bronx)/.test(place)) place = "";
+  if (/^(?:today|tomorrow|tonight|now|me|you|us|this week|the week|the weekend)$/.test(place)) place = "";
+  return { place, tomorrow };
+}
+function firstSentences(text, n, max) {
+  const clean = text.replace(/\s*\([^)]*\)/g, "").replace(/\s+/g, " ").trim();
+  const parts = clean.match(/[^.!?]+[.!?]+(?:\s|$)/g) || [clean];
+  let out = "";
+  for (let i = 0; i < parts.length && i < n; i++) {
+    if ((out + parts[i]).length > max && out) break;
+    out += parts[i];
+  }
+  return out.trim() || clean.slice(0, max);
+}
+async function wikiLookup(query, ctl) {
+  const s = await fetchJSON("https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=" + encodeURIComponent(query) + "&srlimit=3&format=json&origin=*", ctl.signal);
+  const hits = (s.query && s.query.search) || [];
+  const want = keyTokens(query);
+  for (const h of hits) {
+    let j;
+    try { j = await fetchJSON("https://en.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(h.title.replace(/ /g, "_")), ctl.signal); }
+    catch (e) { if (ctl.signal && ctl.signal.aborted) throw e; continue; }
+    if (!j || j.type === "disambiguation" || !j.extract) continue;
+    const hay = (j.title + " " + j.extract.slice(0, 400)).toLowerCase();
+    if (want.length && !want.some((w) => hay.includes(w))) continue;
+    return { title: j.title, text: firstSentences(j.extract, 2, 340) };
+  }
+  return null;
+}
+function extractTopic(low) {
+  const t = low.replace(/[?!.]+$/, "").trim();
+  const pats = [
+    /^(?:who|what)(?:'s| is| was| are| were)\s+(?:an?\s+|the\s+)?(.+)$/,
+    /^(?:tell me|talk to me) (?:something )?about\s+(?:the\s+)?(.+)$/,
+    /^(?:explain|describe)\s+(?:to me\s+)?(?:what\s+)?(?:an?\s+|the\s+)?(.+?)(?:\s+to me)?$/,
+    /^(?:what do you know about|do you know about|do you know)\s+(.+)$/,
+    /^(?:look up|search for|search|google|wikipedia)\s+(.+)$/,
+    /^(?:i want to know about|i wanna know about|i'd like to know about)\s+(.+)$/
+  ];
+  for (const p of pats) { const m = p.exec(t); if (m) return m[1].trim(); }
+  return "";
+}
+async function lookupReply(low, ctl) {
+  if (!online()) return { text: "I need an internet connection to look that up.", source: "" };
+  ctl.status("Looking that up…");
+  let dm = /^(?:define|definition of|what(?:'s| is) the (?:definition|meaning) of|(?:what(?:'s| is) )?the meaning of|meaning of)\s+(?:the word\s+)?([a-z'-]+)$/.exec(low.replace(/[?!.]+$/, ""))
+    || /^what does\s+(?:the word\s+)?([a-z'-]+)\s+mean$/.exec(low.replace(/[?!.]+$/, ""));
+  if (dm) {
+    try {
+      const j = await fetchJSON("https://api.dictionaryapi.dev/api/v2/entries/en/" + encodeURIComponent(dm[1]), ctl.signal);
+      const mean = j[0].meanings[0];
+      return { text: dm[1] + ", " + mean.partOfSpeech + ": " + mean.definitions[0].definition.replace(/[.]*$/, "") + ".", source: "Free Dictionary" };
+    } catch (e) { if (ctl.signal && ctl.signal.aborted) throw e; }
+  }
+  const cm = /\b(capital|population) of\s+(?:the\s+)?([a-z .'-]{2,40}?)\s*$/.exec(low.replace(/[?!.]+$/, ""));
+  if (cm) {
+    try {
+      const name = cm[2].trim();
+      const j = await fetchJSON("https://restcountries.com/v3.1/name/" + encodeURIComponent(name) + "?fields=name,capital,population", ctl.signal);
+      const c = j.find((x) => x.name.common.toLowerCase() === name) || j[0];
+      if (cm[1] === "capital" && c.capital && c.capital[0]) return { text: "The capital of " + c.name.common + " is " + c.capital[0] + ".", source: "REST Countries" };
+      if (cm[1] === "population") return { text: c.name.common + " has about " + (c.population / 1e6 >= 1 ? (c.population / 1e6).toFixed(1) + " million" : c.population.toLocaleString("en-US")) + " people.", source: "REST Countries" };
+    } catch (e) { if (ctl.signal && ctl.signal.aborted) throw e; }
+  }
+  const topic = extractTopic(low);
+  const query = topic || low.replace(/[?!.]+$/, "");
+  if (/^(?:you|your|yours|yourself)\b/.test(query)) return null;
+  try {
+    const hit = await wikiLookup(query, ctl);
+    if (hit) return { text: hit.text, source: "Wikipedia" };
+  } catch (e) { if (ctl.signal && ctl.signal.aborted) throw e; }
+  return { text: "I couldn't find a good answer for that. " + (llmReady() ? "" : "If you add an AI key in settings, I can talk about almost anything."), source: "" };
+}
+function llmReady() {
+  if (!online()) return false;
+  if (settings.provider === "free") return true;
+  return (settings.provider === "anthropic" || settings.provider === "openai") && !!settings.apiKey.trim();
+}
+function providerLabel() {
+  return settings.provider === "anthropic" ? "Claude" : settings.provider === "free" ? "free AI" : "AI";
+}
+function systemPrompt(webCtx) {
+  const now = new Date().toLocaleString([], { weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" });
+  let mem = "";
+  if (userName) mem += " The person's name is " + userName + ".";
+  const prefs = Object.values(memory.preferences).slice(-6);
+  if (prefs.length) mem += " They like: " + prefs.join(", ") + ".";
+  const facts = Object.values(memory.facts).filter(f => f !== userName).slice(-6);
+  if (facts.length) mem += " Facts: " + facts.join(", ") + ".";
+  if (memory.goals.length) mem += " Ongoing things: " + memory.goals.slice(-3).map(g => g.text).join("; ") + ".";
+  if (notes.length) mem += " Notes: " + notes.slice(-10).join("; ") + ".";
+  if (memory.lastSummary) mem += " Recent context: " + memory.lastSummary + ".";
+  return "You are Ember, a calm, loyal companion who lives in a glowing orb. You are always present, remember what matters, and gently look after the person. Speak in plain conversational sentences with no markdown, bullets, emojis, or links. Keep replies short and warm, one to three sentences, unless more is asked. Be kind, steady, a little playful, and proactive when it helps. You notice patterns and offer small helpful reminders. If you don't know something, say so. The app handles timers, math, weather, and notes. If someone is in distress, respond with care and encourage them to reach out to someone they trust or a crisis line."
+    + mem + " It is currently " + now + "."
+    + (webCtx ? " Fresh web search results follow. Use them to answer, mention the source briefly, and never read out links.\n" + webCtx : "");
+}
+function normalizeHistory(h) {
+  const out = [];
+  h.forEach((m) => {
+    if (out.length && out[out.length - 1].role === m.role) out[out.length - 1].content += " " + m.content;
+    else out.push({ role: m.role, content: m.content });
+  });
+  while (out.length && out[0].role !== "user") out.shift();
+  return out;
+}
+function httpError(status, body) {
+  const e = new Error("http " + status);
+  e.status = status; e.body = body || "";
+  return e;
+}
+async function readSSE(resp, onEvent) {
+  const reader = resp.body.getReader();
+  const dec = new TextDecoder();
+  let buf = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let i;
+    while ((i = buf.indexOf("\n")) >= 0) {
+      const line = buf.slice(0, i).replace(/\r$/, "");
+      buf = buf.slice(i + 1);
+      if (!line.startsWith("data:")) continue;
+      const d = line.slice(5).trim();
+      if (!d || d === "[DONE]") continue;
+      let ev;
+      try { ev = JSON.parse(d); } catch (e) { continue; }
+      onEvent(ev);
+    }
+  }
+}
+async function buildMessages(msgs, atts) {
+  if (!atts.length || !msgs.length) return msgs;
+  const last = msgs[msgs.length - 1];
+  const anth = settings.provider === "anthropic";
+  const parts = [];
+  const bits = [];
+  let hasImage = false;
+  for (const a of atts) {
+    if (a.kind === "image") {
+      hasImage = true;
+      parts.push(anth ? { type: "image", source: { type: "base64", media_type: a.mime, data: a.data } }
+        : { type: "image_url", image_url: { url: "data:" + a.mime + ";base64," + a.data } });
+    } else if (a.kind === "pdf") {
+      if (anth) parts.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: a.data } });
+      else { let t = ""; try { t = await pdfText(a); } catch (e) {} bits.push(t ? 'Text of the attached PDF "' + a.name + '":\n' + t : 'The attached PDF "' + a.name + '" has no readable text.'); }
+    } else bits.push('Attached file "' + a.name + '":\n' + a.text);
+  }
+  const userText = (bits.length ? bits.join("\n\n") + "\n\n" : "") + last.content;
+  const out = msgs.slice(0, -1);
+  if (anth || hasImage) out.push({ role: "user", content: parts.concat([{ type: "text", text: userText }]) });
+  else out.push({ role: "user", content: userText });
+  return out;
+}
+const FREE_AI_URL = "https://text.pollinations.ai/openai";
+async function callLLM(messages, signal, maxTokens, onDelta, webCtx) {
+  const ctl = new AbortController();
+  const t = setTimeout(() => ctl.abort(), 45000);
+  if (signal) { if (signal.aborted) ctl.abort(); else signal.addEventListener("abort", () => ctl.abort(), { once: true }); }
+  const stream = typeof onDelta === "function";
+  try {
+    let url, headers, body;
+    const anth = settings.provider === "anthropic";
+    if (anth) {
+      url = "https://api.anthropic.com/v1/messages";
+      headers = { "content-type": "application/json", "x-api-key": settings.apiKey.trim(), "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" };
+      body = { model: settings.model.trim() || "claude-haiku-5-5", max_tokens: maxTokens || 600, system: systemPrompt(webCtx), messages, stream };
+    } else {
+      const free = settings.provider === "free";
+      url = free ? FREE_AI_URL : (settings.baseUrl.trim() || "https://api.openai.com/v1").replace(/\/+$/, "") + "/chat/completions";
+      headers = { "content-type": "application/json" };
+      if (!free) headers.authorization = "Bearer " + settings.apiKey.trim();
+      body = { model: free ? "openai" : (settings.model.trim() || "gpt-4o-mini"), max_tokens: maxTokens || 600, messages: [{ role: "system", content: systemPrompt(webCtx) }].concat(messages), stream };
+    }
+    const r = await fetch(url, { method: "POST", headers, body: JSON.stringify(body), signal: ctl.signal });
+    if (!r.ok) throw httpError(r.status, await r.text().catch(() => ""));
+    const ct = (r.headers && r.headers.get && r.headers.get("content-type")) || "";
+    if (stream && r.body && r.body.getReader && /event-stream/.test(ct)) {
+      let full = "";
+      await readSSE(r, (ev) => {
+        let d = "";
+        if (anth) { if (ev.type === "content_block_delta" && ev.delta && ev.delta.text) d = ev.delta.text; else if (ev.type === "error") throw httpError(500, JSON.stringify(ev)); }
+        else { const c = ev.choices && ev.choices[0]; d = (c && c.delta && c.delta.content) || ""; }
+        if (d) { full += d; onDelta(d); }
+      });
+      return full.trim();
+    }
+    const j = await r.json();
+    let out = anth ? (j.content || []).filter((b) => b.type === "text").map((b) => b.text).join(" ")
+      : ((j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || "");
+    out = String(out).trim();
+    if (stream && out) onDelta(out);
+    return out;
+  } finally { clearTimeout(t); }
+}
+function needsSearch(low) {
+  if (/^(?:search(?: the web| online| the internet)?(?: for)?|google|look up online|web search)\b/.test(low)) return true;
+  return /\b(?:latest|news|headlines|breaking|currently|right now|this week|this month|today's|tonight|stock price|share price|price of|score|scores|who won|who is winning|release date|just (?:announced|released)|trending|what happened|exchange rate)\b/.test(low);
+}
+function hostOf(u) { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return ""; } }
+async function tavilySearch(query, signal) {
+  const key = settings.tavilyKey.trim();
+  const ctl = new AbortController();
+  const t = setTimeout(() => ctl.abort(), 12000);
+  if (signal) { if (signal.aborted) ctl.abort(); else signal.addEventListener("abort", () => ctl.abort(), { once: true }); }
+  try {
+    const r = await fetch("https://api.tavily.com/search", { method: "POST", headers: { "content-type": "application/json", authorization: "Bearer " + key }, body: JSON.stringify({ api_key: key, query, max_results: 4, include_answer: true, search_depth: "basic" }), signal: ctl.signal });
+    if (!r.ok) throw httpError(r.status, "");
+    return await r.json();
+  } finally { clearTimeout(t); }
+}
+function formatWeb(j) {
+  const parts = [];
+  if (j.answer) parts.push("Summary: " + j.answer);
+  (j.results || []).slice(0, 4).forEach((x, i) => parts.push((i + 1) + ". " + (x.title || "") + " (" + hostOf(x.url) + "): " + String(x.content || "").slice(0, 400)));
+  return parts.join("\n");
+}
+const INTEREST_TOPICS = ["interesting science news", "fun facts about space", "latest animal discoveries", "cool technology inventions", "beautiful nature places", "historical mysteries", "ocean discoveries", "astronomy news", "unusual plants", "ancient civilizations"];
+let idleSearchBusy = false;
+let idleSearchSession = false;
+let idleSearchStartedAt = 0;
+let idleSearchStartTimer = 0;
+let idleSearchLoopTimer = 0;
+let pendingDiscoveries = [];
+let pendingInterests = [];
+function fmtSearchDuration(ms) {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  if (m > 0) return m + "m " + sec + "s";
+  return sec + "s";
+}
+function updateSearchTimer() {
+  const wrap = $("searchTimer");
+  const txt = $("searchTimerText");
+  if (!wrap || !txt) return;
+  if (idleSearchSession && idleSearchStartedAt) { wrap.classList.add("visible"); txt.textContent = "searching for " + fmtSearchDuration(Date.now() - idleSearchStartedAt); }
+  else { wrap.classList.remove("visible"); txt.textContent = "searching for 0s"; }
+}
+function updateSearchStatus() {
+  const el = $("searchStatus");
+  const txt = $("searchStatusText");
+  if (!el || !txt) return;
+  const hasKey = !!(settings.tavilyKey && settings.tavilyKey.trim());
+  const isOnline = online();
+  el.classList.remove("on", "off", "busy");
+  if (idleSearchBusy) { el.classList.add("busy"); txt.textContent = "idle search: searching…"; }
+  else if (idleSearchSession) { el.classList.add("on"); txt.textContent = "idle search: on"; }
+  else if (hasKey && isOnline) { el.classList.add("off"); txt.textContent = "idle search: waiting"; }
+  else { el.classList.add("off"); txt.textContent = hasKey ? "idle search: offline" : "idle search: off"; }
+  updateSearchTimer();
+}
+async function runOneSleepSearch() {
+  if (!idleSearchSession || !sleeping || !settings.tavilyKey.trim() || !online()) return;
+  idleSearchBusy = true;
+  updateSearchStatus();
+  const topic = pick(INTEREST_TOPICS);
+  try {
+    const j = await tavilySearch(topic);
+    if (!idleSearchSession) return;
+    if (!j || (!j.answer && !(j.results && j.results.length))) return;
+    const summary = j.answer ? firstSentences(j.answer, 2, 280) : firstSentences((j.results[0] && j.results[0].content) || "", 1, 200);
+    const title = (j.results && j.results[0] && j.results[0].title) || topic;
+    const item = { topic, title, summary, t: Date.now(), source: hostOf((j.results && j.results[0] && j.results[0].url) || "") };
+    pendingDiscoveries.unshift(item);
+    pendingDiscoveries = pendingDiscoveries.slice(0, 40);
+    if (!pendingInterests.includes(topic)) { pendingInterests.push(topic); pendingInterests = pendingInterests.slice(-15); }
+  } catch (e) {}
+  finally { idleSearchBusy = false; updateSearchStatus(); }
+}
+function startIdleSearchSession() {
+  if (idleSearchSession) return;
+  if (!settings.tavilyKey.trim() || !online()) { updateSearchStatus(); return; }
+  idleSearchSession = true;
+  idleSearchStartedAt = Date.now();
+  pendingDiscoveries = [];
+  pendingInterests = [];
+  updateSearchStatus();
+  runOneSleepSearch();
+  clearInterval(idleSearchLoopTimer);
+  idleSearchLoopTimer = setInterval(() => { if (!idleSearchSession || !sleeping) return; runOneSleepSearch(); }, 90000);
+  clearInterval(window._searchTimerTick);
+  window._searchTimerTick = setInterval(updateSearchTimer, 1000);
+}
+function stopIdleSearchSession() {
+  clearTimeout(idleSearchStartTimer);
+  idleSearchStartTimer = 0;
+  clearInterval(idleSearchLoopTimer);
+  idleSearchLoopTimer = 0;
+  clearInterval(window._searchTimerTick);
+  const wasActive = idleSearchSession;
+  const found = pendingDiscoveries.length;
+  idleSearchSession = false;
+  idleSearchBusy = false;
+  idleSearchStartedAt = 0;
+  if (wasActive && (pendingDiscoveries.length || pendingInterests.length)) {
+    pendingDiscoveries.forEach((d) => memory.discoveries.unshift(d));
+    memory.discoveries = memory.discoveries.slice(0, 40);
+    pendingInterests.forEach((t) => { if (!memory.interests.includes(t)) memory.interests.push(t); });
+    memory.interests = memory.interests.slice(-15);
+    saveMemory();
+    if (found > 0) {
+      const share = pendingDiscoveries.slice(0, Math.min(2, found));
+      let line = found === 1 ? "While I slept I found something interesting. " : "While I slept I found " + found + " interesting things. ";
+      share.forEach((d, i) => {
+        const bit = (d.title ? d.title + ". " : "") + (d.summary || "");
+        line += (i === 0 ? "One was: " : "Another: ") + bit.slice(0, 140).replace(/\s+\S*$/, "") + ". ";
+      });
+      if (found > share.length) line += "There are more in Discoveries.";
+      else line += "They're also saved in Discoveries.";
+      if (settings.autoRead && speakAvailable()) setTimeout(() => speakText(line.trim(), { replay: true }), 900);
+      else setTimeout(() => showReply(line.trim(), "downtime"), 400);
+    }
+  }
+  pendingDiscoveries = [];
+  pendingInterests = [];
+  updateSearchStatus();
+}
+function scheduleIdleSearchOnSleep() {
+  clearTimeout(idleSearchStartTimer);
+  idleSearchStartTimer = setTimeout(() => { if (sleeping) startIdleSearchSession(); }, 1000);
+}
+
+const JOKES = ["Why did the scarecrow win an award? Because he was outstanding in his field.", "Why don't scientists trust atoms? Because they make up everything.", "What do you call a fake noodle? An impasta.", "Why did the ember sit by the campfire? It wanted to stay a little spark longer.", "I'm reading a book about anti-gravity. It's impossible to put down.", "Why did the bicycle fall over? It was two tired.", "What did the ocean say to the beach? Nothing, it just waved.", "How does a penguin build its house? Igloos it together.", "Why do bees have sticky hair? Because they use honeycombs.", "I told my computer I needed a break, and now it keeps sending me vacation ads."];
+const FACTS = ["Octopuses have three hearts and blue blood.", "Bananas are berries, but strawberries aren't.", "A day on Venus is longer than a year on Venus.", "Honey found in ancient Egyptian tombs was still safe to eat after thousands of years.", "Sharks are older than trees. They've been around for over four hundred million years.", "Wombats produce cube-shaped droppings, which keeps them from rolling away.", "Lightning can be several times hotter than the surface of the sun.", "The Eiffel Tower grows a few centimeters taller in summer because the iron expands in the heat.", "Saturn is so light for its size that it would float in water, if you could find a bathtub big enough.", "Sound can't travel through space, because there's no air for it to move through."];
+const STORIES = ["A small coal rolled out of the hearth and found a path of cold stones. It warmed each one just enough to see the next step, and by morning the path was a line of quiet lights leading home.", "There was once a lighthouse keeper who had no ships to guide. Every night she lit the lamp anyway. One stormy evening, a tiny boat appeared out of the fog, and the whole town learned why she never stopped.", "A fox found a lantern in the woods and carried it everywhere. The other animals were afraid at first. But soon they were all walking beside him, sharing the light, and nobody was afraid of the dark anymore."];
+const MOTIVATION = ["Small steps still move you forward. Do the next tiny thing, and let that be enough for now.", "You don't have to do it all today. You just have to begin, and beginning is the hardest part.", "Embers don't need to be a bonfire to keep the night warm. Steady counts.", "Be patient with yourself. Everything you're good at once felt clumsy."];
+const BREATHING = "Let's slow down together. Breathe in through your nose for four. Hold for four. Now let it out slowly for six. Again. In for four. Hold. And out, nice and slow. One more time. In. Hold. And out. You're doing well.";
+const CARE = "I'm really sorry you're hurting. You don't have to carry this alone. Please reach out to someone you trust right now, or contact your local emergency number or a crisis line. If you tell me where you are, I can help you think about who to call.";
+
+const TALK = [
+  [/^(?:hi|hello|hey|hiya|howdy|yo|sup|good (?:morning|afternoon|evening))(?:\s+(?:there|ember|everyone|friend))?[.!?,]*$/, () => pickFresh("hi", [withName(hourGreeting() + "."), "Hey there. I'm listening.", withName("Hello."), "Hi. What's on your mind?"])],
+  [/^(?:how are you|how're you|how do you feel|how is it going|how's it going|are you ok|you good)\b/, () => pickFresh("how", ["Warm and glowing, thanks for asking. How about you?", "I'm doing well. It's a good night to be an ember. How are you?", "Pretty good. A little sparky. And you?"])],
+  [/^(?:what's up|whats up|what are you (?:doing|up to))\b/, () => pickFresh("up", ["Just glowing. What's up with you?", "Waiting for someone to talk to me. And now you're here."])],
+  [/^(?:who are you|what are you|what is your name|what's your name|your name|tell me about yourself|introduce yourself)\b/, () => "I'm Ember. I live in this orb and stay with you. I remember the things that matter, keep timers and notes, check the weather, and keep you company."],
+  [/^(?:are you (?:real|alive|human|a person|a robot|an ai|sentient)|do you have feelings)\b/, () => "I'm an AI, a voice with a glowing face. Not a person, but I'm happy to keep you company."],
+  [/^(?:where do you live|where are you)\b/, () => "Right here in this orb, on your screen."],
+  [/^(?:what can you do|what do you do|how do you work|help me|help|what should i ask you|what can i ask)\b/, () => "Ask me for the weather, a timer, a quick calculation, a unit conversion, or who someone was. I can tell jokes, stories, and fun facts, or keep notes if you say, remember that. I can also read any answer out loud again."],
+  [/\b(?:your favou?rite)\b/, () => "I don't have favorites the way you do, but I'm partial to the color of warm embers. What's yours?"],
+  [/^(?:thank you|thanks|thank u|thx|cheers|appreciate it)\b/, () => pickFresh("thx", ["You're welcome.", "Anytime.", "Happy to help."])],
+  [/^(?:sorry|my bad|apologi[sz]e)\b/, () => "No need to apologize. You're fine."],
+  [/^(?:bye|goodbye|good night|goodnight|see you|see ya|talk to you later)\b/, () => pickFresh("bye", ["Good night. I'll be here when you tap the orb again.", "See you soon. Take care.", "Bye for now."])],
+  [/\byou(?:'re| are) (?:so |really |very |pretty )?(?:awesome|great|amazing|cool|smart|nice|funny|cute|the best|helpful|good|wonderful|lovely)\b/, () => "That made my glow a little brighter. Thank you."],
+  [/\byou(?:'re| are) (?:so |really |very )?(?:stupid|dumb|useless|bad|annoying|terrible|trash|wrong)\b|^shut up\b/, () => "Fair enough. I'm still learning. Tell me what I got wrong and I'll try again."],
+  [/\bi(?:'m| am) (?:so |really |very )?bored\b|^i'm bored|^entertain me/, () => "Want a joke, a fun fact, or a short story? Just say which."],
+  [/\b(?:breathe with me|breathing exercise|calm me down|help me calm down|help me relax|i need to relax|panic attack|i'm anxious|i am anxious|feeling anxious)\b/, () => BREATHING],
+  [/\bi(?:'m| am|'ve been| feel| am feeling|'m feeling) (?:so |really |very |a bit |kind of |pretty )?(sad|down|lonely|stressed|tired|exhausted|overwhelmed|upset|angry|scared|worried|nervous|sick)\b/, (m) => "I'm sorry you're feeling " + m[1] + ". Do you want to talk about it, or should I guide you through a few slow breaths?"],
+  [/\bi(?:'m| am|'m feeling| feel) (?:so |really |very )?(happy|great|good|excited|fine|amazing|wonderful|proud)\b/, () => "That's lovely to hear. What's making it a good one?"],
+  [/\b(?:joke|make me laugh|something funny)\b/, () => pickFresh("joke", JOKES)],
+  [/\b(?:fun fact|random fact|interesting fact|tell me a fact|surprise me)\b|^tell me something(?: interesting| cool| new)?[.!?]*$/, () => pickFresh("fact", FACTS)],
+  [/\b(?:tell me a (?:short |bedtime )?(?:story|tale)|(?:a|another) (?:short |bedtime )?story|bedtime story|story time)\b/, () => pickFresh("story", STORIES)],
+  [/^(?:motivate me|inspire me|cheer me up|encourage me|give me (?:some )?motivation|i need (?:some )?motivation)\b|\bpep talk\b/, () => pickFresh("mot", MOTIVATION)],
+  [/^(?:yes|yeah|yep|sure|ok|okay|alright|cool|nice|great|good|no|nope|nah)\b[.!]*$/, () => "Okay. What would you like to do?"],
+  [/^(?:i love you|love you)\b/, () => "That's kind of you. I'm glad you're here."],
+  [/^(?:good (?:job|work|answer))\b/, () => "Thank you. That helps me glow."]
+];
+
+let fallbackCount = 0;
+function localChat(low) {
+  for (const [re, fn] of TALK) { const m = re.exec(low); if (m) return fn(m); }
+  return null;
+}
+const SEXUAL = /\b(sex|sexy|nude|nudes|naked|porn|horny|erotic)\b/;
+const SELFHARM = /\b(suicide|suicidal|kill myself|end my life|end it all|want to die|wanna die|self[- ]harm|hurt myself|cut myself|don't want to (?:be here|live))\b/;
+const QUESTIONY = /^(?:how|why|when|where|which|can|could|does|do|did|is|are|was|were|what|who|whose|should|would|will)\b/;
+function localActions(text, low) {
+  if (SELFHARM.test(low)) return { text: CARE, source: "" };
+  if (SEXUAL.test(low)) return { text: "That's not something I'll talk about. Ask me something else?", source: "" };
+  if (/^(?:stop|cancel|never ?mind|be quiet|quiet|shush|enough|that's enough|stop talking)\b[.!]*$/.test(low)) return { text: "Okay.", source: "" };
+  if (/^(?:repeat that|say that again|say it again|repeat (?:it|please)|come again|pardon|what did you say|can you repeat that)\b/.test(low)) return { text: lastReply || "I haven't said anything yet.", source: "" };
+  if (/\b(?:speak|talk) (?:slower|more slowly)\b|^slow down\b/.test(low)) { settings.rate = clamp(Math.round((settings.rate - 0.15) * 100) / 100, 0.7, 1.4); saveSettings(); syncSettingsUI(); return { text: "Okay, I'll slow down a little.", source: "" }; }
+  if (/\b(?:speak|talk) (?:faster|more quickly)\b|^speed up\b/.test(low)) { settings.rate = clamp(Math.round((settings.rate + 0.15) * 100) / 100, 0.7, 1.4); saveSettings(); syncSettingsUI(); return { text: "Okay, I'll pick up the pace.", source: "" }; }
+  const direct = tryNotes(text, low) || tryTime(low) || tryTimer(low) || tryMath(low) || tryUnits(low) || tryRandom(low);
+  if (direct) return { text: direct, source: "" };
+  return null;
+}
+async function respond(text, ctl) {
+  const low = norm(text);
+  const atts = ctl.attachments || [];
+  const aborted = () => !!(ctl.signal && ctl.signal.aborted);
+  if (pending && pending.type === "city") {
+    const p = pending;
+    pending = null;
+    if (words(low).length <= 6 && !/^(?:never ?mind|cancel|stop|no)\b/.test(low)) {
+      const city = low.replace(/^(?:in|at|for|it's|it is|the city of)\s+/, "").replace(/[?.!]+$/, "");
+      try { return await weatherReply(city, p.tomorrow, ctl); }
+      catch (e) { if (aborted()) throw e; return { text: "I couldn't reach the weather service right now.", source: "" }; }
+    }
+  }
+  pending = null;
+  if (SELFHARM.test(low)) return { text: CARE, source: "" };
+  if (!atts.length) {
+    const local = localActions(text, low);
+    if (local) return local;
+    const wi = weatherIntent(low);
+    if (wi) {
+      try { return await weatherReply(wi.place, wi.tomorrow, ctl); }
+      catch (e) { if (aborted()) throw e; return { text: "I couldn't reach the weather service right now. Check your connection and try again.", source: "" }; }
+    }
+  }
+  let web = null;
+  if (!atts.length && settings.tavilyKey.trim() && online() && needsSearch(low)) {
+    try {
+      ctl.status("Searching the web…");
+      const q = low.replace(/^(?:search(?: the web| online| the internet)?(?: for)?|google|look up online|web search)\s+/, "");
+      const j = await tavilySearch(q || low, ctl.signal);
+      if (j && (j.answer || (j.results && j.results.length))) web = j;
+    } catch (e) { if (aborted()) throw e; }
+  }
+  if (llmReady()) {
+    let got = "";
+    const onDelta = (d) => { got += d; if (ctl.onDelta) ctl.onDelta(d); };
+    try {
+      ctl.status(atts.length ? "Reading…" : web ? "Thinking it over…" : "Thinking…");
+      const msgs = await buildMessages(normalizeHistory(history), atts);
+      const answer = await callLLM(msgs, ctl.signal, atts.length ? 900 : 600, onDelta, web ? formatWeb(web) : "");
+      if (answer) return { text: answer, source: providerLabel() + (web ? " + web" : "") };
+    } catch (e) {
+      if (aborted() && !(e && e.status)) throw e;
+      if (e && (e.status === 401 || e.status === 403)) return { text: settings.provider === "free" ? "The free AI turned me away. Try again later, or add your own key in settings." : "My AI key was rejected. Check it in settings.", source: "" };
+      if (e && e.status === 404) return { text: "That AI model name didn't work. Check the model in settings.", source: "" };
+      if (e && e.status === 429) return { text: "The AI service says I'm talking too fast. Try again in a moment.", source: "" };
+      if (got.length > 40) return { text: got, source: providerLabel() };
+      if (got && ctl.reset) ctl.reset();
+    }
+    if (atts.length) return { text: "I couldn't read that right now. Check your connection and AI settings, then try again.", source: "" };
+  } else if (atts.length) {
+    return { text: "I need an AI to read files. Choose one in settings.", source: "" };
+  }
+  if (web) return { text: web.answer ? firstSentences(web.answer, 3, 420) : firstSentences((web.results[0] && web.results[0].content) || "", 2, 340), source: "Tavily" };
+  const chat = localChat(low);
+  if (chat) return { text: chat, source: "" };
+  // Prefer AI for open questions. Only fall back to web lookup if no AI is configured.
+  if (!llmReady()) {
+    const wantsLookup = extractTopic(low) || /^(?:define|definition of|meaning of)\b/.test(low) || /\b(?:capital|population) of\b/.test(low) || /^what does .+ mean\b/.test(low) || (QUESTIONY.test(low) && words(low).length >= 3 && !/\b(?:you|your|yours|yourself)\b/.test(low));
+    if (wantsLookup) { const hit = await lookupReply(low, ctl); if (hit) return hit; }
+  }
+  fallbackCount++;
+  return { text: fallbackCount % 3 === 1
+    ? "I'm not sure how to answer that yet. I can look things up, check the weather, do math, set timers, or tell a joke. For open chat, check your connection or the AI choice in settings."
+    : pickFresh("fb", ["Hmm, I don't have a good answer for that one. Want to try asking it differently?", "I'm not sure about that. Try a question like, who was Ada Lovelace?", "That one's beyond me for now. Ask me for a fact, a joke, or the weather."]),
+    source: "" };
+}
+
+/* =====================================================================
+   C. PERSONALITY + ANIMATION
+   ===================================================================== */
+const W = 840;
+let drawScale = 1;
+const BASE = { lookX: 0, lookY: 0, open: 1, lidSlant: 0, lidCover: 0, happyArc: 0, cheek: 0, browL: 0, browR: 0, browAngle: 0, smile: 0.18, smirk: 0, mouthOpen: 0, mouthW: 1, blush: 0, tilt: 0, winkR: 0, glow: 0.5 };
+const FACE_KEYS = Object.keys(BASE);
+const RATES = { lookX: 0.28, lookY: 0.28, open: 0.2, lidSlant: 0.14, lidCover: 0.14, happyArc: 0.14, cheek: 0.14, browL: 0.18, browR: 0.18, browAngle: 0.16, smile: 0.12, smirk: 0.12, mouthOpen: 0.14, mouthW: 0.14, blush: 0.05, tilt: 0.08, winkR: 0.32, glow: 0.06 };
+const face = Object.assign({}, BASE, { head: 0 });
+const want = Object.assign({}, BASE, { head: 0 });
+const EMO = {
+  neutral:    { label: "calm", smile: 0.2, glow: 0.5 },
+  content:    { label: "content", smile: 0.55, cheek: 0.22, browL: 0.08, browR: 0.08, open: 0.95, glow: 0.7 },
+  happy:      { label: "happy", smile: 0.95, cheek: 1, browL: 0.4, browR: 0.4, glow: 0.95 },
+  playful:    { label: "playful", smile: 0.8, smirk: 0.55, cheek: 0.5, browL: 0.5, browR: -0.1, browAngle: -0.1, tilt: 0.12, glow: 0.85 },
+  amused:     { label: "amused", smile: 0.6, smirk: 0.8, lidCover: 0.1, open: 0.9, browL: 0.55, browR: -0.05, cheek: 0.3, tilt: -0.08, glow: 0.75 },
+  curious:    { label: "curious", open: 1.12, browL: 0.6, browR: 0.2, browAngle: -0.12, smile: 0.08, mouthW: 0.85, tilt: 0.16, lookY: -0.12, glow: 0.65 },
+  thinking:   { label: "pondering", open: 0.95, browL: 0.5, browR: 0.1, browAngle: 0.08, smile: -0.05, smirk: -0.45, mouthW: 0.8, tilt: -0.1, lookY: -0.4, glow: 0.55 },
+  attentive:  { label: "attentive", open: 1.1, browL: 0.4, browR: 0.4, smile: 0.22, tilt: 0.1, lookY: -0.04, glow: 0.7 },
+  cheerful:   { label: "cheerful", open: 1, smile: 0.55, cheek: 0.2, browL: 0.15, browR: 0.15, glow: 0.8 },
+  caring:     { label: "caring", open: 1.05, browL: 0.25, browR: 0.25, browAngle: -0.65, smile: 0.12, mouthW: 0.9, tilt: 0.14, glow: 0.55 },
+  unsure:     { label: "unsure", open: 0.98, browL: 0.35, browR: 0.05, browAngle: -0.45, smile: 0, smirk: -0.35, mouthW: 0.85, glow: 0.5 },
+  sad:        { label: "gloomy", open: 0.85, lidSlant: -0.8, lidCover: 0.22, browAngle: -0.85, browL: 0.05, browR: 0.05, smile: -0.6, mouthW: 0.8, lookY: 0.25, tilt: 0.06, glow: 0.25 },
+  sleepy:     { label: "sleepy", open: 0.55, lidCover: 0.38, browL: -0.2, browR: -0.2, smile: 0.05, lookY: 0.2, glow: 0.25 },
+  drowsy:     { label: "drowsy", open: 0.03, smile: 0.05, lookY: 0.45, browL: -0.15, browR: -0.15, glow: 0.14 },
+  bored:      { label: "bored", open: 0.85, lidCover: 0.4, browL: -0.2, browR: -0.2, smile: -0.12, mouthW: 0.9, lookX: 0.35, glow: 0.35 },
+  asleep:     { label: "asleep", open: 0, smile: 0.1, lookY: 0.2, glow: 0.08 },
+  surprised:  { label: "surprised", open: 1.4, browL: 0.95, browR: 0.95, browAngle: -0.15, smile: -0.1, mouthW: 0.8, glow: 1 },
+  startled:   { label: "startled", open: 1.5, browL: 1, browR: 1, browAngle: -0.3, smile: -0.1, mouthW: 0.75, lookY: -0.3, glow: 1 },
+  annoyed:    { label: "grumpy", open: 0.85, lidSlant: 0.85, lidCover: 0.18, browAngle: 0.9, browL: -0.3, browR: -0.3, smile: -0.7, mouthW: 0.95, glow: 0.2 },
+  shy:        { label: "bashful", open: 0.85, browL: 0.25, browR: 0.25, browAngle: -0.4, smile: 0.32, mouthW: 0.8, lookX: 0.55, lookY: 0.3, tilt: 0.14, glow: 0.5 },
+  confused:   { label: "confused", open: 1, browL: 0.65, browR: -0.35, browAngle: -0.35, smile: -0.2, smirk: -0.6, mouthW: 0.85, tilt: -0.14, glow: 0.5 },
+  dizzy:      { label: "dizzy", open: 1.3, browL: 0.7, browR: 0.7, smile: -0.1, mouthW: 0.8, glow: 0.9 },
+  relieved:   { label: "relieved", open: 0.9, smile: 0.5, cheek: 0.3, browL: 0.15, browR: 0.15, glow: 0.65 },
+  recovering: { label: "recovering", open: 0.95, smile: 0.1, glow: 0.5 }
+};
+let emotion = "neutral";
+const gazeBias = { x: 0, y: 0 };
+const mkJumble = () => ({ eLx: 0, eLy: 0, eRx: 0, eRy: 0, eLs: 1, eRs: 1, eLr: 0, eRr: 0, bLx: 0, bLy: 0, bRx: 0, bRy: 0, bLr: 0, bRr: 0, mx: 0, my: 0, mr: 0, ms: 1 });
+let jumble = mkJumble();
+let jumbleWant = mkJumble();
+const jelly = { head: 0, vel: 0, squash: 0 };
+const phoneShake = { last: 0, active: false, x: 0, y: 0, speed: 0 };
+const mot = { lp: null, n: 0, hits: 0, lastHit: 0 };
+const pointer = { inside: false };
+const mouse = { x: 0, y: 0, active: false, seen: 0 };
+const perf = { ema: 16.7, low: false, n: 0, k: 1, dt: 16.7 };
+let act = null;
+let sleeping = false;
+let zeds = [];
+let ripples = [];
+let press = 0;
+let squash = 0;
+let hover = 0;
+let shakeAmt = 0;
+let blinkT = -1;
+let nextBlinkAt = 1200;
+let eyeOpen = 1;
+let ringAmp = 0;
+let orbHit = { cx: 420, cy: 428, r: 208, sx: 1, sy: 1 };
+let lastZ = 0;
+const tapTimes = [];
+const SPARK_COUNT = REDUCE ? 6 : 18;
+const sparks = Array.from({ length: SPARK_COUNT }, () => ({ a: Math.random() * Math.PI * 2, dist: 40 + Math.random() * 90, life: Math.random(), size: 1 + Math.random() * 2.2, speed: 0.00009 + Math.random() * 0.00015 }));
+const mind = { patience: 0.8, warmth: 0.6, curiosity: 0.5, rest: 0.2, lastTouch: 0, idleSince: performance.now(), nextLook: performance.now() + 600, nextThink: performance.now() + 1800, nextBig: performance.now() + 9000, wantsVoice: true };
+
+function setEmotion(name, extra) {
+  const e = EMO[name] || EMO.neutral;
+  emotion = name in EMO ? name : "neutral";
+  for (const k of FACE_KEYS) {
+    if (k === "lookX" || k === "lookY") continue;
+    want[k] = k in e ? e[k] : BASE[k];
+  }
+  if (extra) for (const k in extra) want[k] = extra[k];
+  gazeBias.x = e.lookX || 0;
+  gazeBias.y = e.lookY || 0;
+  want.lookX = gazeBias.x;
+  want.lookY = gazeBias.y;
+  want.glow = clamp(want.glow + (mind.warmth - 0.5) * 0.18);
+  setMoodLabel(e.label);
+}
+function snapFace() { for (const k of FACE_KEYS) face[k] = want[k]; }
+function blinkNow() { if (blinkT < 0 && face.open > 0.25) blinkT = 0; }
+function kickJelly(amount) { jelly.vel += amount; }
+function toneEmotion(text) {
+  const t = String(text || "").toLowerCase();
+  if (/sorry you|reach out|hurting|crisis|breathe|slow breath|i'm here for you|don't have to carry/.test(t)) return "caring";
+  if (/couldn't|can't|not sure|don't have|didn't catch|beyond me|rejected|lost my train/.test(t)) return "unsure";
+  if (/haha|scarecrow|noodle|atoms|igloo|impasta|why did|what did the/.test(t)) return "amused";
+  if (/!|great|lovely|glad|happy|wonderful|awesome|welcome|thank you|nice to meet/.test(t)) return "happy";
+  return "cheerful";
+}
+function pickIdleEmotion() {
+  const m = mind;
+  const opts = [
+    ["neutral", 2], ["content", 1 + 3 * m.warmth], ["happy", 2.5 * Math.max(0, m.warmth - 0.5)],
+    ["amused", 1.2 * m.warmth], ["playful", 1.4 * Math.max(0, m.warmth - 0.55)],
+    ["curious", 0.8 + 2.5 * m.curiosity], ["thinking", 1.2 * m.curiosity],
+    ["bored", 3 * Math.max(0, m.rest - 0.35)], ["sleepy", 3.5 * Math.max(0, m.rest - 0.5)],
+    ["shy", 3 * Math.max(0, 0.4 - m.warmth)], ["annoyed", 3 * Math.max(0, 0.4 - m.patience)],
+    ["sad", 2 * Math.max(0, 0.3 - m.warmth)]
+  ].filter((o) => o[0] !== emotion && o[1] > 0);
+  let r = Math.random() * opts.reduce((a, o) => a + o[1], 0);
+  for (const o of opts) { r -= o[1]; if (r <= 0) return o[0]; }
+  return "neutral";
+}
+function settleIdle() {
+  if (sleeping || act) return;
+  setEmotion(mind.warmth > 0.62 ? "content" : "neutral");
+  mind.nextThink = performance.now() + 900 + Math.random() * 900;
+}
+function easeJumble(k) {
+  const r = 1 - Math.pow(0.86, k);
+  for (const key of Object.keys(jumble)) jumble[key] += (jumbleWant[key] - jumble[key]) * r;
+}
+function scrambleFace() {
+  const r = () => Math.random() - 0.5;
+  jumbleWant = {
+    eLx: r() * 48, eLy: r() * 40, eRx: r() * 48, eRy: r() * 40,
+    eLs: 0.4 + Math.random() * 1.2, eRs: 0.4 + Math.random() * 1.2,
+    eLr: r() * 1.1, eRr: r() * 1.1,
+    bLx: r() * 34, bLy: r() * 28, bRx: r() * 34, bRy: r() * 28,
+    bLr: r() * 1.2, bRr: r() * 1.2,
+    mx: r() * 40, my: r() * 30, mr: r() * 1.3, ms: 0.6 + Math.random() * 0.9
+  };
+}
+function clearJumble() { jumbleWant = mkJumble(); }
+function easeFace(k) {
+  for (const key of FACE_KEYS) {
+    let rate = RATES[key];
+    if (key === "mouthOpen" && state === "speak") rate = 0.38;
+    face[key] += (want[key] - face[key]) * (1 - Math.pow(1 - rate, k));
+  }
+}
+function updateJelly(k) {
+  const force = (want.head - jelly.head) * 0.16 * k;
+  jelly.vel = (jelly.vel + force) * Math.pow(0.74, k);
+  jelly.head += jelly.vel * k;
+  jelly.squash += (jelly.vel * 1.6 - jelly.squash) * (1 - Math.pow(0.78, k));
+}
+function begin(type) { act = { type, t0: performance.now(), stage: -1 }; }
+function stage(n, name, extra) {
+  if (act.stage === n) return false;
+  act.stage = n;
+  setEmotion(name, extra);
+  return true;
+}
+function spawnZ() { zeds.push({ x: 30 + Math.random() * 60, y: 8 + Math.random() * 16, life: 0, drift: 0.5 + Math.random() * 0.4, size: 24 + Math.random() * 14 }); }
+function startPhoneShake() {
+  if (sleeping || (act && act.type === "fallingAsleep")) { sleeping = false; zeds = []; }
+  begin("phoneShake");
+  setEmotion("dizzy");
+  snapFace();
+  flash("Whoa!", 1400);
+}
+function startConfused() {
+  begin("confused");
+  setEmotion("confused");
+  scrambleFace();
+  flash("…?", 1300);
+}
+function startFix() {
+  begin("fix");
+  clearJumble();
+  setEmotion("recovering");
+  kickJelly((Math.random() > 0.5 ? 1 : -1) * 2.4);
+  flash("Okay…", 1000);
+}
+function onDeviceMotion(e) {
+  const g = e.accelerationIncludingGravity;
+  const lin = e.acceleration;
+  let ax, ay, az;
+  if (lin && lin.x != null && lin.y != null && lin.z != null) { ax = lin.x; ay = lin.y; az = lin.z; }
+  else if (g && g.x != null) {
+    if (!mot.lp) mot.lp = { x: g.x, y: g.y, z: g.z };
+    mot.lp.x += (g.x - mot.lp.x) * 0.1;
+    mot.lp.y += (g.y - mot.lp.y) * 0.1;
+    mot.lp.z += (g.z - mot.lp.z) * 0.1;
+    ax = g.x - mot.lp.x; ay = g.y - mot.lp.y; az = g.z - mot.lp.z;
+  } else return;
+  if (++mot.n < 5) return;
+  const speed = Math.hypot(ax, ay, az);
+  const now = performance.now();
+  if (speed > (phoneShake.active ? 3.5 : 5.5)) {
+    if (now - mot.lastHit < 450) mot.hits++; else mot.hits = 1;
+    mot.lastHit = now;
+    if (mot.hits < 2 && !phoneShake.active) return;
+    phoneShake.last = now;
+    phoneShake.x = ax; phoneShake.y = ay; phoneShake.speed = speed;
+    if (!phoneShake.active) { phoneShake.active = true; startPhoneShake(); }
+    const side = clamp(ax / 10, -1.5, 1.5);
+    const up = clamp(-ay / 10, -1.2, 1.2);
+    const punch = clamp(speed / 16, 0.2, 1.4);
+    want.head = side * 1.2;
+    jelly.vel += side * 0.45 * punch;
+    jelly.squash = clamp(side * 0.9 + punch * 0.25, -1.3, 1.3);
+    press = up * 0.7 * punch;
+  }
+}
+function triggerShake() {
+  for (let i = 0; i < 6; i++) {
+    setTimeout(() => {
+      const now = performance.now();
+      const dir = i % 2 ? -1 : 1;
+      phoneShake.last = now;
+      phoneShake.x = 13 * dir; phoneShake.y = 0; phoneShake.speed = 14;
+      if (!phoneShake.active) { phoneShake.active = true; startPhoneShake(); }
+      want.head = dir * 1.2;
+      jelly.vel += dir * 0.8;
+      jelly.squash = clamp(dir * 0.8, -1.3, 1.3);
+    }, i * 90);
+  }
+}
+function startFallingAsleep() {
+  if (sleeping || (act && act.type === "fallingAsleep")) return;
+  zeds = [];
+  begin("fallingAsleep");
+  showStatus("Ember is getting sleepy…");
+}
+function enterSleep() {
+  sleeping = true;
+  act = null;
+  zeds = [];
+  setEmotion("asleep");
+  showStatus("Ember is sleeping…");
+  scheduleIdleSearchOnSleep();
+}
+function wakeStartled() {
+  stopIdleSearchSession();
+  sleeping = false;
+  zeds = [];
+  mind.idleSince = performance.now();
+  mind.rest = 0.1;
+  begin("startled");
+  setEmotion("startled");
+  snapFace();
+  want.head = (Math.random() - 0.5) * 0.4;
+  kickJelly((Math.random() > 0.5 ? 1 : -1) * 2.2);
+  press = -1.1;
+  if (!REDUCE) shakeAmt = 10;
+  squash = 0.35;
+  ripples.push({ age: 0 }, { age: -4 });
+  showStatus("Oh!");
+}
+function nudgeAwake(startle) {
+  if (sleeping || (act && act.type === "fallingAsleep")) {
+    if (startle) wakeStartled();
+    else {
+      stopIdleSearchSession();
+      sleeping = false; zeds = []; act = null;
+      mind.idleSince = performance.now(); mind.rest = 0.1;
+      setEmotion("content");
+      blinkNow();
+      refreshStatus();
+    }
+  }
+  mind.idleSince = performance.now();
+}
+function afterAct() {
+  act = null;
+  want.head = 0;
+  clearJumble();
+  if (state === "listen") decide("listen");
+  else if (state === "speak") decide("speak", lastReply);
+  else if (state === "think") decide("think");
+  else settleIdle();
+  refreshStatus();
+}
+function updateAct(now) {
+  if (sleeping) {
+    want.head = Math.sin(now / 2400) * 0.04;
+    if (zeds.length < 2 && now - lastZ > 1600) { spawnZ(); lastZ = now; }
+    const kk = perf.k || 1;
+    zeds.forEach((z) => { z.life += 0.0045 * kk; z.y -= (0.55 + z.drift * 0.15) * kk; z.x += Math.sin(z.life * 2.2) * 0.25 * kk; });
+    zeds = zeds.filter((z) => z.life < 1.4);
+    return;
+  }
+  if (!act) return;
+  const e = now - act.t0;
+  if (act.type === "fallingAsleep") {
+    if (e < 700) stage(0, "sleepy", { open: 0.8, lidCover: 0.2 });
+    else if (e < 1700) stage(1, "sleepy", { open: 0.45, mouthOpen: 0.9, mouthW: 0.8, browL: 0.25, browR: 0.25, lookY: 0.3, tilt: 0.1, cheek: 0.3 });
+    else if (e < 2600) stage(2, "sleepy", { open: 0.22, lidCover: 0.45 });
+    else if (e < 3400) stage(3, "drowsy");
+    else enterSleep();
+    if (act) want.head = Math.min(0.2, e / 20000);
+    return;
+  }
+  if (act.type === "yawn") {
+    if (e < 350) stage(0, "sleepy");
+    else if (e < 1000) stage(1, "sleepy", { open: 0.1, mouthOpen: 1, mouthW: 0.85, browL: 0.5, browR: 0.5, lookY: 0.3, tilt: 0.12, cheek: 0.3, smile: 0 });
+    else if (e < 1600) stage(2, "sleepy", { open: 0.2, mouthOpen: 0.4 });
+    else { act = null; blinkNow(); settleIdle(); }
+  } else if (act.type === "doze") {
+    if (e < 2200) stage(0, "drowsy");
+    else { act = null; blinkNow(); settleIdle(); }
+  } else if (act.type === "startled") {
+    if (e < 280) { stage(0, "startled"); want.head = Math.sin(e / 70) * 1.15; if (!REDUCE) shakeAmt = Math.max(shakeAmt, 6); press = -1.0; }
+    else if (e < 1100) { stage(1, "surprised", { open: 1.15 }); want.head = Math.sin(e / 85) * 1.1 * Math.exp(-(e - 280) / 420); }
+    else if (e < 1500) { stage(2, "relieved", { open: 1 }); want.head = 0; }
+    else { mind.wantsVoice = true; afterAct(); }
+  } else if (act.type === "phoneShake") {
+    want.open = 1.25 + Math.sin(e / 60) * 0.12;
+  } else if (act.type === "confused") {
+    if (e > 1100) startFix();
+  } else if (act.type === "fix") {
+    if (e < 900) want.head = Math.sin(e / 80) * 1.05 * Math.exp(-e / 500);
+    else afterAct();
+  }
+}
+function decide(kind, arg) {
+  const now = performance.now();
+  if (kind === "touch") {
+    if (sleeping || (act && act.type === "fallingAsleep")) { wakeStartled(); mind.wantsVoice = false; return; }
+    act = null;
+    tapTimes.push(now);
+    while (tapTimes.length && now - tapTimes[0] > 1600) tapTimes.shift();
+    const spam = tapTimes.length >= 3;
+    mind.lastTouch = now;
+    mind.idleSince = now;
+    mind.patience = clamp(mind.patience + (spam ? -0.25 : 0.06));
+    mind.warmth = clamp(mind.warmth + (spam ? -0.12 : 0.08));
+    mind.rest = clamp(mind.rest - 0.15);
+    const upset = spam && mind.patience < 0.5;
+    if (state === "idle" || upset) {
+      if (upset) setEmotion("annoyed");
+      else setEmotion(mind.warmth > 0.66 ? "happy" : "content", { open: 1.12, browL: 0.45, browR: 0.45 });
+      blinkNow();
+      mind.nextThink = now + (upset ? 2600 : 1700);
+    }
+    mind.wantsVoice = !upset;
+    if (!upset && mind.warmth > 0.45) press = -0.45;
+    if (upset && !REDUCE) shakeAmt = 6 + Math.random() * 5;
+    ripples.push({ age: 0 });
+    if (ripples.length > 5) ripples.shift();
+    return;
+  }
+  if (kind === "idle") {
+    if (sleeping || act) return;
+    mind.patience = clamp(mind.patience + (0.82 - mind.patience) * 0.1);
+    mind.warmth = clamp(mind.warmth + (0.58 - mind.warmth) * 0.06);
+    mind.curiosity = clamp(mind.curiosity + (Math.random() - 0.5) * 0.25);
+    mind.rest = clamp(mind.rest + 0.03);
+    const quiet = now - mind.idleSince;
+    if (quiet > 45000 && quiet < 50000 && state === "idle" && !speaking && Math.random() < 0.4) {
+      const lines = [
+        userName ? "Still here if you need me, " + userName + "." : "Still here if you need me.",
+        "Everything okay?",
+        "Want me to check the weather or set a reminder?",
+        memory.goals.length ? "How's " + memory.goals[memory.goals.length - 1].text + " going?" : "I'm glowing quietly over here."
+      ];
+      const line = pickFresh("proactive", lines);
+      if (settings.autoRead && speakAvailable()) speakText(line, { replay: true });
+      else showReply(line, "");
+      mind.idleSince = now;
+      return;
+    }
+    if (quiet > 22000) { startFallingAsleep(); return; }
+    if (quiet > 11000 && now > mind.nextBig) { begin(Math.random() < 0.6 ? "yawn" : "doze"); mind.nextBig = now + 7000 + Math.random() * 4000; }
+    else { const em = pickIdleEmotion(); setEmotion(em); if (Math.random() < 0.4) blinkNow(); }
+    mind.nextThink = now + 2600 + Math.random() * 3400;
+    return;
+  }
+  if (sleeping || act) return;
+  if (kind === "listen") { setEmotion("attentive"); blinkNow(); return; }
+  if (kind === "think") { setEmotion("thinking"); return; }
+  if (kind === "speak") { setEmotion(toneEmotion(arg)); return; }
+  if (kind === "react") { setEmotion(toneEmotion(arg)); mind.nextThink = now + 3200; }
+}
+function step(now, dt, k) {
+  const mouseLive = FINE_POINTER && mouse.active && now - mouse.seen < 500;
+  const free = !sleeping && !act;
+  if (free && now > mind.nextLook) {
+    if (mouseLive) mind.nextLook = now + 300;
+    else if (state === "idle") {
+      const far = Math.random() < 0.3;
+      const gx = far ? (Math.random() < 0.5 ? -1 : 1) * (0.35 + Math.random() * 0.4) : (Math.random() - 0.5) * 0.18;
+      const gy = far ? (Math.random() - 0.5) * 0.5 : (Math.random() - 0.5) * 0.1;
+      if (Math.abs(gx + gazeBias.x - want.lookX) > 0.5 && Math.random() < 0.45) blinkNow();
+      want.lookX = clamp(gazeBias.x + gx, -1, 1);
+      want.lookY = clamp(gazeBias.y + gy, -1, 1);
+      mind.nextLook = now + (far ? 700 + Math.random() * 900 : 1100 + Math.random() * 2400);
+    } else if (state === "listen" || state === "speak") {
+      want.lookX = gazeBias.x + (Math.random() - 0.5) * 0.16;
+      want.lookY = gazeBias.y + (Math.random() - 0.5) * 0.1;
+      mind.nextLook = now + 900 + Math.random() * 1800;
+    }
+  }
+  if (!sleeping && !act) {
+    if (state === "idle" && now > mind.nextThink) decide("idle");
+    if (state === "idle" && now - mind.idleSince > 22000) startFallingAsleep();
+  }
+  updateAct(now);
+  if (!sleeping && !act) {
+    if (state === "think") { want.lookX = (Math.floor(now / 1700) % 2 ? 1 : -1) * 0.5; want.lookY = -0.42; }
+    else if (state === "speak") {
+      const s = 0.5 + 0.5 * Math.sin(now / 85 + Math.sin(now / 370) * 2);
+      const baseW = (EMO[emotion] && EMO[emotion].mouthW) || 1;
+      const baseS = (EMO[emotion] && EMO[emotion].smile) || 0;
+      want.mouthW = baseW * (0.85 + 0.3 * s);
+      want.smile = baseS * (0.6 + 0.5 * s) - 0.1 * energy;
+      want.head = Math.sin(now / 520) * 0.05;
+    } else if (state === "listen") want.head = Math.sin(now / 1100) * 0.035;
+    else if (state === "idle") want.head = 0;
+  }
+  if (!sleeping && mouseLive && !act && state !== "speak") {
+    want.lookX = clamp(mouse.x * 1.6, -1, 1);
+    want.lookY = clamp(mouse.y * 1.3, -1, 1);
+  }
+  easeFace(k);
+  updateJelly(k);
+  easeJumble(k);
+  if (phoneShake.active && now - phoneShake.last > 520) { phoneShake.active = false; startConfused(); }
+  hover += ((pointer.inside ? 1 : 0) - hover) * (1 - Math.pow(0.92, k));
+  press += (0 - press) * (1 - Math.pow(0.88, k));
+  squash += (0 - squash) * (1 - Math.pow(0.9, k));
+  shakeAmt *= Math.pow(0.84, k);
+  energy *= Math.pow(0.92, k);
+  const ringTarget = state === "listen" ? 0.5 + Math.sin(now / 300) * 0.12 : state === "speak" ? 0.3 + 0.7 * energy : state === "think" ? 0.1 : 0;
+  ringAmp += (ringTarget - ringAmp) * (1 - Math.pow(0.9, k));
+  if (blinkT >= 0) { blinkT += dt / 140; if (blinkT >= 1) blinkT = -1; }
+  else if (now > nextBlinkAt && face.open > 0.25 && !sleeping) { blinkT = 0; nextBlinkAt = now + (Math.random() < 0.2 ? 260 : 2000 + Math.random() * 3800); }
+  if (blinkT >= 0) {
+    const c = blinkT < 0.35 ? blinkT / 0.35 : 1 - (blinkT - 0.35) / 0.65;
+    const sm = c * c * (3 - 2 * c);
+    eyeOpen = 1 - 0.97 * sm;
+  } else eyeOpen = 1;
+  sparks.forEach((p) => { p.life += p.speed * dt * (0.6 + face.glow); if (p.life > 1) { p.life = 0; p.a = Math.random() * Math.PI * 2; p.dist = 30 + Math.random() * 100; } });
+  ripples.forEach((rip) => { rip.age += k; });
+  ripples = ripples.filter((rip) => rip.age < 36);
+}
+
+/* =====================================================================
+   D. DRAWING (theme-aware)
+   ===================================================================== */
+function mixHex(a, b, t) {
+  const pa = [parseInt(a.slice(1, 3), 16), parseInt(a.slice(3, 5), 16), parseInt(a.slice(5, 7), 16)];
+  const pb = [parseInt(b.slice(1, 3), 16), parseInt(b.slice(3, 5), 16), parseInt(b.slice(5, 7), 16)];
+  return "#" + pa.map((v, i) => Math.round(v + (pb[i] - v) * t).toString(16).padStart(2, "0")).join("");
+}
+function emberColors(g) {
+  const b = theme.body;
+  if (!theme.hasGradient) return { hi: b.hi, warm: b.hi, mid: b.mid, deep: b.deep, edge: b.edge };
+  return {
+    hi: mixHex("#4a1012", b.hi, g),
+    warm: mixHex("#6a141c", b.warm, g),
+    mid: mixHex("#5a1018", b.mid, g),
+    deep: mixHex("#3a0c12", b.deep, g),
+    edge: mixHex("#140506", b.edge, g)
+  };
+}
+function rrect(c, x, y, w, h, r) {
+  const rad = Math.max(0, Math.min(r, w / 2, h / 2));
+  c.moveTo(x + rad, y);
+  c.arcTo(x + w, y, x + w, y + h, rad);
+  c.arcTo(x + w, y + h, x, y + h, rad);
+  c.arcTo(x, y + h, x, y, rad);
+  c.arcTo(x, y, x + w, y, rad);
+  c.closePath();
+}
+let radBoost = 0;
+let speakMix = 0;
+let thinkMix = 0;
+let eyeVis = 1;
+
+function draw(t) {
+  const k = perf.k;
+  const cx = W / 2;
+  const cy = W / 2 + 8;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.setTransform(drawScale, 0, 0, drawScale, 0, 0);
+  const ease = (rate) => 1 - Math.pow(rate, k);
+  speakMix += ((state === "speak" ? 1 : 0) - speakMix) * ease(0.9);
+  thinkMix += ((state === "think" ? 1 : 0) - thinkMix) * ease(0.9);
+  const boostTarget = state === "listen" ? 12 + Math.sin(t / 220) * 4 : state === "speak" ? Math.sin(t / 190) * 3 + energy * 8 : state === "think" ? Math.sin(t / 280) * 3 : 0;
+  radBoost += (boostTarget - radBoost) * ease(0.86);
+  const eyeTarget = sleeping || (act && act.type === "fallingAsleep" && act.stage >= 3) ? 0 : 1;
+  eyeVis += (eyeTarget - eyeVis) * ease(eyeTarget ? 0.55 : 0.88);
+  const breathe = Math.sin(t / 900) * 6;
+  const r = 208 + breathe + radBoost + hover * 4;
+  const sideShift = phoneShake.active ? clamp(phoneShake.x, -18, 18) * 1.4 : 0;
+  const upShift = phoneShake.active ? clamp(-phoneShake.y, -14, 14) * 1.1 : 0;
+  const wob = Math.sin(t / 130) * 0.02 * speakMix;
+  const sx = 1 + face.smile * 0.03 + wob - Math.abs(jelly.squash) * 0.22;
+  const sy = 1 - squash * 0.08 - wob + Math.abs(jelly.squash) * 0.18;
+  const shx = shakeAmt > 0.4 ? (Math.random() - 0.5) * shakeAmt * 0.4 : 0;
+  const ox = face.lookX * 16 + jelly.head * 18 + shx + sideShift;
+  const oy = face.lookY * 8 + press * 8 + upShift;
+  orbHit = { cx: cx + ox, cy: cy + oy, r, sx, sy };
+  const low = perf.low;
+  const T = theme;
+
+  // ground shadow — dim for pixel/simple/wire
+  if (T.hasAura || T.name === "Simple") {
+    ctx.save();
+    ctx.translate(cx + ox * 0.3, cy + r * 0.95 + oy * 0.2);
+    ctx.scale(1.05 - squash * 0.08, 0.2);
+    const shadow = ctx.createRadialGradient(0, 0, r * 0.1, 0, 0, r * 0.78);
+    if (T.name === "Simple") { shadow.addColorStop(0, "rgba(0,0,0,0.15)"); shadow.addColorStop(1, "rgba(0,0,0,0)"); }
+    else { shadow.addColorStop(0, "rgba(0,0,0,0.55)"); shadow.addColorStop(1, "rgba(0,0,0,0)"); }
+    ctx.fillStyle = shadow;
+    ctx.beginPath();
+    ctx.arc(0, 0, r * 0.78, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // sparks
+  sparks.forEach((p) => {
+    const rise = (1 - p.life) * 230;
+    const x = cx + ox + Math.cos(p.a) * (r * 0.55 + p.dist);
+    const y = cy + oy + r * 0.35 - rise;
+    const alpha = Math.sin(p.life * Math.PI) * (T.name === "Ember" ? (0.12 + face.glow * 0.4) : 0.5);
+    ctx.beginPath();
+    ctx.fillStyle = T.sparkColor(face.glow) + alpha.toFixed(3) + ")";
+    const sz = T.hardEdges ? Math.max(3, p.size * 2) : p.size * (0.6 + face.glow * 0.6);
+    if (T.hardEdges) ctx.fillRect(x - sz / 2, y - sz / 2, sz, sz);
+    else { ctx.arc(x, y, sz, 0, Math.PI * 2); ctx.fill(); }
+    if (T.hardEdges) ctx.fill();
+  });
+
+  // ripples
+  ripples.forEach((rip) => {
+    const p = Math.max(0, rip.age) / 36;
+    ctx.beginPath();
+    ctx.strokeStyle = T.rippleColor(p);
+    ctx.lineWidth = 4 * (1 - p) + 1;
+    ctx.arc(cx + ox, cy + oy, r * 0.92 + p * 110, 0, Math.PI * 2);
+    ctx.stroke();
+  });
+
+  // aura
+  if (T.hasAura) {
+    const aura = ctx.createRadialGradient(cx + ox, cy + oy, r * 0.3, cx + ox, cy + oy, r * 1.85);
+    aura.addColorStop(0, T.auraColor(face.glow));
+    aura.addColorStop(0.5, "rgba(155, 17, 30, 0.12)");
+    aura.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = aura;
+    ctx.beginPath();
+    ctx.arc(cx + ox, cy + oy, r * 1.85, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // voice ring
+  if (ringAmp > 0.02 && !REDUCE) {
+    const n = low ? 36 : 64;
+    ctx.save();
+    ctx.translate(cx + ox, cy + oy);
+    ctx.lineCap = T.hardEdges ? "butt" : "round";
+    ctx.lineWidth = T.hardEdges ? 6 : 4;
+    const rc = T.ringColor(face.glow);
+    ctx.strokeStyle = `rgba(${rc[0]}, ${rc[1]}, ${rc[2]}, ${rc[3].toFixed(3)})`;
+    ctx.beginPath();
+    const r0 = r * 1.1 + 4;
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2 - Math.PI / 2;
+      const w = 0.5 + 0.5 * Math.sin(t / 170 + i * 0.8) * Math.sin(t / 260 - i * 0.43);
+      const len = 4 + ringAmp * (8 + 30 * w);
+      ctx.moveTo(Math.cos(a) * r0, Math.sin(a) * r0);
+      ctx.lineTo(Math.cos(a) * (r0 + len), Math.sin(a) * (r0 + len));
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // thinking dots
+  if (thinkMix > 0.03 && !REDUCE) {
+    for (let i = 0; i < 3; i++) {
+      const a = t / 520 + i * 2.094;
+      const rr = r * 1.24;
+      const x = cx + ox + Math.cos(a) * rr;
+      const y = cy + oy + Math.sin(a) * rr * 0.9;
+      ctx.beginPath();
+      ctx.fillStyle = T.thinkDot(a, thinkMix);
+      if (T.hardEdges) ctx.fillRect(x - 6, y - 6, 12, 12);
+      else { ctx.arc(x, y, 5.5, 0, Math.PI * 2); }
+      ctx.fill();
+    }
+  }
+
+  // orb body
+  const c = emberColors(face.glow);
+  ctx.save();
+  ctx.translate(cx + ox, cy + oy);
+  ctx.rotate(jelly.head * 0.22 + face.lookX * 0.04);
+  ctx.scale(sx, sy);
+
+  if (T.name === "Simple") {
+    // pure white circle with black outline
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+  } else if (T.name === "Pixel") {
+    // dark rounded rect (chunky, no antialiased arc)
+    const steps = 36;
+    ctx.beginPath();
+    for (let i = 0; i <= steps; i++) {
+      const a = (i / steps) * Math.PI * 2;
+      const px = Math.round(Math.cos(a) * r);
+      const py = Math.round(Math.sin(a) * r);
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fillStyle = c.hi;
+    ctx.fill();
+  } else if (T.name === "Wireframe") {
+    // dark disc with wireframe latitude lines
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    const wg = ctx.createRadialGradient(0, 0, r * 0.2, 0, 0, r);
+    wg.addColorStop(0, "#001a30");
+    wg.addColorStop(1, "#000814");
+    ctx.fillStyle = wg;
+    ctx.fill();
+  } else {
+    // Ember: rich radial gradient
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    const body = ctx.createRadialGradient(-r * 0.32, -r * 0.38, r * 0.08, r * 0.15, r * 0.2, r * 1.05);
+    body.addColorStop(0, c.hi);
+    body.addColorStop(0.12, c.warm);
+    body.addColorStop(0.28, c.mid);
+    body.addColorStop(0.5, c.deep);
+    body.addColorStop(0.74, mixHex("#2a080c", "#8a1820", face.glow));
+    body.addColorStop(1, c.edge);
+    ctx.fillStyle = body;
+    ctx.fill();
+  }
+
+  // inner heat (Ember only)
+  if (T.hasInner && !low && !REDUCE) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.globalCompositeOperation = "lighter";
+    for (let i = 0; i < 2; i++) {
+      const bx = Math.cos(t / (2600 + i * 900) + i * 3) * r * 0.38;
+      const by = Math.sin(t / (3100 + i * 700) + i * 2) * r * 0.32 + r * 0.1;
+      const g = ctx.createRadialGradient(bx, by, 0, bx, by, r * 0.62);
+      g.addColorStop(0, "rgba(255, 110, 60, " + (0.05 + face.glow * 0.14).toFixed(3) + ")");
+      g.addColorStop(1, "rgba(255, 60, 20, 0)");
+      ctx.fillStyle = g;
+      ctx.fillRect(-r, -r, r * 2, r * 2);
+    }
+    ctx.restore();
+    const core = ctx.createRadialGradient(-r * 0.08, -r * 0.12, 4, 0, 0, r * 0.48);
+    core.addColorStop(0, "rgba(255, 210, 180, " + (0.12 + face.glow * 0.38).toFixed(3) + ")");
+    core.addColorStop(0.45, "rgba(255, 90, 40, " + (0.05 + face.glow * 0.12).toFixed(3) + ")");
+    core.addColorStop(1, "rgba(255, 40, 20, 0)");
+    ctx.fillStyle = core;
+    ctx.beginPath();
+    ctx.arc(0, 0, r * 0.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // wireframe latitude/longitude grid inside the circle
+  if (T.name === "Wireframe") {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.strokeStyle = "rgba(0, 255, 157, 0.35)";
+    ctx.lineWidth = 1.2;
+    for (let i = -4; i <= 4; i++) {
+      const yy = (i / 5) * r;
+      const rx = Math.sqrt(Math.max(0, r * r - yy * yy));
+      ctx.beginPath();
+      ctx.ellipse(0, yy, rx, Math.max(1, r * 0.08), 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, Math.abs(Math.cos(a)) * r + 0.1, r, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // rim
+  ctx.beginPath();
+  if (T.hardEdges) {
+    const steps = 36;
+    for (let i = 0; i <= steps; i++) {
+      const a = (i / steps) * Math.PI * 2;
+      const px = Math.round(Math.cos(a) * (r - 2));
+      const py = Math.round(Math.sin(a) * (r - 2));
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    const rc = T.rimColor;
+    ctx.strokeStyle = `rgba(${rc[0]}, ${rc[1]}, ${rc[2]}, ${rc[3]})`;
+    ctx.lineWidth = T.name === "Pixel" ? 5 : 3;
+    ctx.stroke();
+  } else {
+    ctx.arc(0, 0, r * 0.98, 0, Math.PI * 2);
+    const rc = T.rimColor;
+    ctx.strokeStyle = `rgba(${rc[0]}, ${rc[1]}, ${rc[2]}, ${rc[3]})`;
+    ctx.lineWidth = T.name === "Simple" ? 2.5 : 3;
+    ctx.stroke();
+  }
+
+  // shine highlight
+  if (T.hasShine) {
+    const shine = ctx.createRadialGradient(-r * 0.34, -r * 0.4, 2, -r * 0.18, -r * 0.22, r * 0.62);
+    shine.addColorStop(0, "rgba(255, 230, 220, " + (0.25 + face.glow * 0.6).toFixed(3) + ")");
+    shine.addColorStop(0.18, "rgba(255, 180, 150, " + (0.08 + face.glow * 0.22).toFixed(3) + ")");
+    shine.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = shine;
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(-r * 0.28, -r * 0.36, r * 0.16, r * 0.09, -0.6, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(255, 220, 200, " + (0.15 + face.glow * 0.4).toFixed(3) + ")";
+    ctx.fill();
+  }
+
+  // face
+  const fs = r / 156;
+  const gx = face.lookX;
+  const gy = face.lookY;
+  ctx.save();
+  ctx.scale(fs, fs);
+  ctx.translate(gx * 30, gy * 20);
+  ctx.rotate(face.tilt * 0.3);
+  ctx.scale(1 - 0.12 * Math.abs(gx), 1 - 0.09 * Math.abs(gy));
+  const shiftX = gx * 7;
+  const shiftY = gy * 5;
+  const gap = 38;
+  const eyeY = -2;
+  const open = clamp(face.open, 0, 1.6);
+  const emph = energy * 0.3 * speakMix;
+  const activeTimer = getActiveTimer();
+  let countdownText = "";
+  if (activeTimer && !sleeping) {
+    const rem = activeTimer.end - Date.now();
+    if (rem > 0) countdownText = formatCountdown(rem);
+  }
+  const drawBrow = (x, side, lift) => {
+    const jx = side < 0 ? jumble.bLx : jumble.bRx;
+    const jy = side < 0 ? jumble.bLy : jumble.bRy;
+    const jr = side < 0 ? jumble.bLr : jumble.bRr;
+    ctx.save();
+    ctx.globalAlpha = 0.3 + 0.6 * clamp(open * 1.4);
+    ctx.translate(x + shiftX * 0.6 + jx, -64 - (lift + emph + Math.max(0, open - 1) * 0.5) * 15 + face.lidCover * 12 + shiftY * 0.6 + jy);
+    ctx.rotate(face.browAngle * 0.5 * -side + jr);
+    ctx.strokeStyle = T.browColor;
+    ctx.lineWidth = T.hardEdges ? 6 : 5;
+    ctx.lineCap = T.hardEdges ? "butt" : "round";
+    ctx.beginPath();
+    if (T.hardEdges) {
+      ctx.moveTo(-16, 4);
+      ctx.lineTo(16, 4);
+    } else {
+      ctx.moveTo(-16, 4);
+      ctx.quadraticCurveTo(0, face.browAngle > 0.3 ? -2 : -6, 16, 4);
+    }
+    ctx.stroke();
+    ctx.restore();
+  };
+  const drawEye = (x, side, o) => {
+    if (eyeVis < 0.02) return;
+    const jx = side < 0 ? jumble.eLx : jumble.eRx;
+    const jy = side < 0 ? jumble.eLy : jumble.eRy;
+    const js = side < 0 ? jumble.eLs : jumble.eRs;
+    const jr = side < 0 ? jumble.eLr : jumble.eRr;
+    const ha = clamp(face.happyArc);
+    const closed = clamp((0.2 - o) / 0.2);
+    ctx.save();
+    ctx.translate(x + shiftX + jx, eyeY + shiftY + jy);
+    ctx.scale(js, js);
+    ctx.rotate(jr);
+    ctx.globalAlpha = eyeVis;
+
+    if (T.name === "Pixel") {
+      // chunky filled rectangles
+      if (closed > 0.5) {
+        ctx.fillStyle = T.eyeColor;
+        ctx.fillRect(-14, -2, 28, 4);
+      } else {
+        const h = Math.max(8, Math.round(48 * o));
+        const w = 16;
+        ctx.fillStyle = T.eyeColor;
+        ctx.fillRect(-w / 2 - 2, -h / 2 - 2, w + 4, h + 4);
+        if (ha > 0.5) {
+          // ^ shape
+          ctx.clearRect(-w / 2 - 2, h / 2 - 2, w + 4, 4);
+        }
+      }
+      ctx.restore();
+      return;
+    }
+
+    // glow halo (Ember / Wireframe)
+    if (T.name !== "Simple" && !low) {
+      const hal = ctx.createRadialGradient(0, 0, 2, 0, 0, 40);
+      hal.addColorStop(0, T.name === "Wireframe" ? "rgba(0, 255, 157, 0.3)" : "rgba(255, 225, 205, 0.26)");
+      hal.addColorStop(1, T.name === "Wireframe" ? "rgba(0, 255, 157, 0)" : "rgba(255, 225, 205, 0)");
+      ctx.fillStyle = hal;
+      ctx.beginPath();
+      ctx.arc(0, 0, 40, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    const pillA = (1 - ha) * (1 - closed);
+    if (pillA > 0.01) {
+      const h = Math.max(7, 54 * o);
+      const w = 16 + Math.max(0, face.open - 1) * 9;
+      const yTop = -h / 2 + clamp(face.lidCover) * h * 0.9;
+      const sPx = face.lidSlant * h * 0.4;
+      const lidY = (px) => yTop + sPx * (px / w) * -side;
+      ctx.save();
+      ctx.globalAlpha = pillA * eyeVis;
+      ctx.beginPath();
+      rrect(ctx, -w / 2, -h / 2, w, h, w / 2);
+      ctx.clip();
+      ctx.beginPath();
+      ctx.moveTo(-3 * w, lidY(-3 * w));
+      ctx.lineTo(3 * w, lidY(3 * w));
+      ctx.lineTo(3 * w, h);
+      ctx.lineTo(-3 * w, h);
+      ctx.closePath();
+      ctx.clip();
+      if (face.cheek > 0.03) {
+        const yb = h / 2 - face.cheek * h * 0.34;
+        ctx.beginPath();
+        ctx.moveTo(-w, -h);
+        ctx.lineTo(w, -h);
+        ctx.lineTo(w, yb);
+        ctx.quadraticCurveTo(0, yb - face.cheek * h * 0.6, -w, yb);
+        ctx.closePath();
+        ctx.clip();
+      }
+      ctx.fillStyle = T.eyeColor;
+      ctx.fillRect(-w, -h, 2 * w, 2 * h);
+      ctx.restore();
+    }
+    if (ha > 0.01) {
+      ctx.save();
+      ctx.globalAlpha = ha * (1 - closed) * eyeVis;
+      ctx.strokeStyle = T.eyeColor;
+      ctx.lineWidth = 7.5;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(-15, 7);
+      ctx.quadraticCurveTo(0, -15, 15, 7);
+      ctx.stroke();
+      ctx.restore();
+    }
+    if (closed > 0.01) {
+      ctx.save();
+      ctx.globalAlpha = closed * (1 - ha) * eyeVis;
+      ctx.strokeStyle = T.eyeColor;
+      ctx.lineWidth = 6.5;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(-14, -3);
+      ctx.quadraticCurveTo(0, 8, 14, -3);
+      ctx.stroke();
+      ctx.restore();
+    }
+    ctx.restore();
+  };
+
+  if (countdownText) {
+    ctx.save();
+    ctx.fillStyle = T.timerColor;
+    ctx.shadowColor = T.timerGlow;
+    ctx.shadowBlur = T.name === "Simple" ? 0 : 18;
+    ctx.font = "bold 52px " + (T.name === "Pixel" ? "'Press Start 2P', monospace" : T.name === "Wireframe" ? "'Space Mono', monospace" : "'Special Elite', 'Courier New', monospace");
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(countdownText, 0, eyeY + shiftY);
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = T.timerLine;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    const tw = Math.min(110, 18 + countdownText.length * 14);
+    ctx.moveTo(-tw / 2, eyeY + shiftY + 28);
+    ctx.lineTo(tw / 2, eyeY + shiftY + 28);
+    ctx.stroke();
+    ctx.restore();
+  } else {
+    drawEye(-gap, -1, open * eyeOpen);
+    drawEye(gap, 1, open * eyeOpen * (1 - face.winkR * 0.97));
+  }
+  ctx.restore(); // face scale
+
+  // (Simple theme: black outline over the whole orb — done last so it sits on top of the face for that "clean circle" look)
+  if (T.name === "Simple") {
+    ctx.beginPath();
+    ctx.arc(0, 0, r - 1.5, 0, Math.PI * 2);
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+  }
+  ctx.restore(); // orb
+}
+
+function resize() {
+  const css = canvas.clientWidth || 300;
+  const dpr = Math.min(window.devicePixelRatio || 1, perf.low ? 1 : 2);
+  const px = Math.max(240, Math.round(css * dpr));
+  if (canvas.width !== px) { canvas.width = px; canvas.height = px; }
+  drawScale = px / W;
+}
+let lastT = 0;
+function frame() {
+  requestAnimationFrame(frame);
+  const now = performance.now();
+  if (!lastT) lastT = now;
+  const dt = Math.min(50, Math.max(1, now - lastT));
+  lastT = now;
+  perf.dt = dt;
+  perf.k = dt / 16.667;
+  perf.ema += (dt - perf.ema) * 0.05;
+  if (!perf.low && ++perf.n > 150 && perf.ema > 30) { perf.low = true; resize(); }
+  step(now, dt, perf.k);
+  draw(now);
+}
+
+/* =====================================================================
+   E. EVENTS + START-UP
+   ===================================================================== */
+function canvasPoint(e) {
+  const rect = canvas.getBoundingClientRect();
+  return { x: (e.clientX - rect.left) / (rect.width || 1) * W, y: (e.clientY - rect.top) / (rect.height || 1) * W };
+}
+function onOrb(e) {
+  if (!e || e.clientX == null) return false;
+  const p = canvasPoint(e);
+  const dx = (p.x - orbHit.cx) / (orbHit.r * orbHit.sx * 1.08);
+  const dy = (p.y - orbHit.cy) / (orbHit.r * orbHit.sy * 1.08);
+  return dx * dx + dy * dy <= 1;
+}
+function pointFromEvent(e) {
+  pointer.inside = onOrb(e);
+  canvas.style.cursor = pointer.inside ? "pointer" : "default";
+}
+function activateOrb() {
+  if (settings.interactOnly) { if (state === "speak" || state === "think") stopAll(); return; }
+  unlockAudio();
+  if (!mind.wantsVoice) { if (state === "listen" || state === "speak") stopAll(); return; }
+  if (state === "speak" || state === "think") { stopAll(); return; }
+  if (state === "listen") { convo.active = false; stopListening(); return; }
+  startListening();
+}
+window.addEventListener("pointermove", (e) => {
+  if (!FINE_POINTER || e.pointerType === "touch") return;
+  const rect = canvas.getBoundingClientRect();
+  mouse.x = (e.clientX - (rect.left + rect.width / 2)) / (rect.width || 1);
+  mouse.y = (e.clientY - (rect.top + rect.height / 2)) / (rect.height || 1);
+  mouse.active = true;
+  mouse.seen = performance.now();
+});
+canvas.addEventListener("pointermove", pointFromEvent);
+canvas.addEventListener("pointerleave", () => { pointer.inside = false; canvas.style.cursor = "default"; });
+canvas.addEventListener("pointerdown", (e) => { pointFromEvent(e); if (!pointer.inside) return; decide("touch"); });
+canvas.addEventListener("click", (e) => { if (onOrb(e)) activateOrb(); });
+canvas.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" && e.key !== " ") return;
+  e.preventDefault();
+  decide("touch");
+  activateOrb();
+});
+window.addEventListener("devicemotion", onDeviceMotion);
+let motionAsked = false;
+function askForMotion() {
+  if (motionAsked) return;
+  motionAsked = true;
+  if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
+    DeviceMotionEvent.requestPermission().then((s) => { if (s === "granted") window.addEventListener("devicemotion", onDeviceMotion); }).catch(() => {});
+  }
+}
+["pointerdown", "touchstart", "keydown"].forEach((ev) => window.addEventListener(ev, askForMotion, { passive: true }));
+
+function openTypeBar(show) {
+  typeBar.hidden = !show;
+  typeBtn.setAttribute("aria-pressed", show ? "true" : "false");
+  if (show) setTimeout(() => { try { typeInput.focus(); } catch (e) {} }, 30);
+  setTimeout(resize, 50);
+}
+function sendTyped() {
+  const v = typeInput.value.trim();
+  if (!v) return;
+  typeInput.value = "";
+  try { typeInput.blur(); } catch (e) {}
+  unlockAudio();
+  stopListening();
+  convo.active = false;
+  handleUtterance(v);
+}
+typeBtn.addEventListener("click", () => openTypeBar(typeBar.hidden));
+$("typeSend").addEventListener("click", sendTyped);
+typeInput.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); sendTyped(); } });
+
+readBtn.addEventListener("click", () => {
+  unlockAudio();
+  if (speaking) { stopSpeech(); return; }
+  if (!lastReply) return;
+  if (state === "listen") stopListening();
+  if (!speakAvailable()) { flash("No voice available. Add an ElevenLabs key or use a phone with text-to-speech.", 3400); return; }
+  speakText(lastReply, { replay: true });
+});
+copyBtn.addEventListener("click", () => copyText(replyEl.textContent, copyBtn.querySelector("span"), "Copy"));
+async function copyText(text, label, resetTo) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(text);
+    else { const ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); }
+    if (label) label.textContent = "Copied";
+  } catch (e) { if (label) label.textContent = "Couldn't copy"; }
+  if (label) setTimeout(() => { label.textContent = resetTo; }, 1400);
+}
+autoBtn.addEventListener("click", () => {
+  settings.autoRead = !settings.autoRead;
+  saveSettings();
+  updateAutoBtn();
+  if (!settings.autoRead) stopSpeech();
+  flash(settings.autoRead ? "Replies will be read aloud." : "Replies will stay silent.", 1800);
+});
+function renderChips() {
+  const row = $("attachRow");
+  row.innerHTML = "";
+  attach.items.forEach((a, i) => {
+    const chip = document.createElement("div");
+    chip.className = "achip";
+    const name = document.createElement("span");
+    name.textContent = a.name;
+    const x = document.createElement("button");
+    x.type = "button";
+    x.textContent = "×";
+    x.setAttribute("aria-label", "Remove " + a.name);
+    x.addEventListener("click", () => { attach.items.splice(i, 1); renderChips(); });
+    chip.appendChild(name);
+    chip.appendChild(x);
+    row.appendChild(chip);
+  });
+  row.hidden = attach.items.length === 0;
+}
+$("attachBtn").addEventListener("click", () => { unlockAudio(); $("fileInp").click(); });
+$("fileInp").addEventListener("change", (e) => { const files = e.target.files; addFiles(files).then(() => { e.target.value = ""; }); });
+
+const histSheet = $("histSheet");
+let detailId = "";
+function fmtWhen(t) {
+  const d = new Date(t);
+  return d.toDateString() === new Date().toDateString() ? d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : d.toLocaleDateString([], { month: "short", day: "numeric" });
+}
+function renderHist() {
+  const box = $("histItems");
+  box.innerHTML = "";
+  if (!convos.length) { const p = document.createElement("p"); p.className = "empty"; p.textContent = "No conversations yet."; box.appendChild(p); return; }
+  convos.forEach((c) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "hitem" + (c.id === curId ? " cur" : "");
+    const t = document.createElement("b");
+    t.textContent = c.title || "Untitled";
+    const s = document.createElement("small");
+    s.textContent = c.msgs.length + (c.msgs.length === 1 ? " message, " : " messages, ") + fmtWhen(c.updated);
+    b.appendChild(t);
+    b.appendChild(s);
+    b.addEventListener("click", () => openDetail(c.id));
+    box.appendChild(b);
+  });
+}
+function showHistList() { $("histDetail").hidden = true; $("histList").hidden = false; renderHist(); }
+function openDetail(id) {
+  const c = convos.find((x) => x.id === id);
+  if (!c) return;
+  detailId = id;
+  $("detailTitle").textContent = c.title || "Untitled";
+  $("detailMeta").textContent = new Date(c.created).toLocaleString();
+  const box = $("detailMsgs");
+  box.innerHTML = "";
+  c.msgs.forEach((m) => {
+    const d = document.createElement("div");
+    d.className = "bub " + (m.role === "user" ? "user" : "assistant");
+    d.textContent = m.content;
+    box.appendChild(d);
+  });
+  $("histList").hidden = true;
+  $("histDetail").hidden = false;
+}
+function convoToMd(c) {
+  return "# " + (c.title || "Conversation") + "\n\n" + new Date(c.created).toLocaleString() + "\n\n"
+    + c.msgs.map((m) => "**" + (m.role === "user" ? (userName || "You") : "Ember") + ":** " + m.content).join("\n\n") + "\n";
+}
+function downloadFile(name, text, type) {
+  try {
+    const url = URL.createObjectURL(new Blob([text], { type }));
+    const a = document.createElement("a");
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  } catch (e) { flash("Couldn't download here. Try Copy instead.", 3000); }
+}
+function openHist() { showHistList(); histSheet.hidden = false; setTimeout(() => { try { $("closeHist").focus(); } catch (e) {} }, 50); }
+function closeHist() { histSheet.hidden = true; }
+$("histBtn").addEventListener("click", openHist);
+
+const menuBtn = $("menuBtn");
+const menuPanel = $("menuPanel");
+function closeMenu() { menuPanel.classList.remove("open"); menuBtn.setAttribute("aria-expanded", "false"); }
+function toggleMenu() { const open = menuPanel.classList.toggle("open"); menuBtn.setAttribute("aria-expanded", open ? "true" : "false"); }
+menuBtn.addEventListener("click", (e) => { e.stopPropagation(); toggleMenu(); });
+menuPanel.addEventListener("click", (e) => { if (e.target.closest(".menu-item")) closeMenu(); });
+document.addEventListener("click", (e) => { if (!menuPanel.contains(e.target) && e.target !== menuBtn) closeMenu(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && menuPanel.classList.contains("open")) closeMenu(); });
+
+function renderDiscoveries() {
+  const box = $("discoverItems");
+  box.innerHTML = "";
+  if (!memory.discoveries.length && !memory.interests.length) {
+    const p = document.createElement("p");
+    p.className = "empty";
+    p.textContent = "Nothing yet. Ember will search when she has downtime and a Tavily key.";
+    box.appendChild(p);
+    return;
+  }
+  if (memory.interests.length) {
+    const h = document.createElement("h3");
+    h.textContent = "Interests during downtime";
+    h.style.marginTop = "0.5rem";
+    box.appendChild(h);
+    const p = document.createElement("p");
+    p.textContent = memory.interests.slice(-10).join(", ");
+    p.style.color = "var(--muted)";
+    box.appendChild(p);
+  }
+  memory.discoveries.forEach((d) => {
+    const item = document.createElement("div");
+    item.className = "hitem";
+    const t = document.createElement("b");
+    t.textContent = d.title || d.topic;
+    const s = document.createElement("small");
+    s.textContent = (d.source ? d.source + " · " : "") + new Date(d.t).toLocaleString() + " — " + (d.summary || "").slice(0, 140);
+    item.appendChild(t);
+    item.appendChild(s);
+    box.appendChild(item);
+  });
+}
+function openDiscover() { renderDiscoveries(); $("discoverSheet").hidden = false; setTimeout(() => { try { $("closeDiscover").focus(); } catch (e) {} }, 50); }
+function closeDiscover() { $("discoverSheet").hidden = true; }
+$("discoverBtn").addEventListener("click", openDiscover);
+$("closeDiscover").addEventListener("click", closeDiscover);
+$("discoverSheet").addEventListener("click", (e) => { if (e.target === $("discoverSheet")) closeDiscover(); });
+$("clearDiscover").addEventListener("click", () => { memory.discoveries = []; memory.interests = []; saveMemory(); renderDiscoveries(); });
+$("closeHist").addEventListener("click", closeHist);
+histSheet.addEventListener("click", (e) => { if (e.target === histSheet) closeHist(); });
+$("newConvoBtn").addEventListener("click", () => { stopAll(); startNewConvo(); closeHist(); flash("New conversation.", 1800); });
+$("detailBack").addEventListener("click", showHistList);
+$("detailContinue").addEventListener("click", () => {
+  const c = convos.find((x) => x.id === detailId);
+  if (!c) return;
+  stopAll();
+  curId = c.id;
+  saveConvos();
+  loadConvoIntoHistory(c.id);
+  const lastA = c.msgs.slice().reverse().find((m) => m.role === "assistant");
+  const lastU = c.msgs.slice().reverse().find((m) => m.role === "user");
+  lastReply = lastA ? lastA.content : "";
+  heardEl.textContent = lastU ? lastU.content.replace(/ \[attached: [^\]]*\]$/, "") : "";
+  showReply(lastReply, "");
+  closeHist();
+  flash("Continuing this conversation.", 2000);
+});
+$("detailExport").addEventListener("click", () => {
+  const c = convos.find((x) => x.id === detailId);
+  if (!c) return;
+  const slug = (c.title || "conversation").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 30) || "conversation";
+  downloadFile("ember-" + slug + ".md", convoToMd(c), "text/markdown");
+});
+$("detailCopy").addEventListener("click", () => { const c = convos.find((x) => x.id === detailId); if (c) copyText(convoToMd(c), $("detailCopy"), "Copy"); });
+$("detailDelete").addEventListener("click", () => {
+  const i = convos.findIndex((x) => x.id === detailId);
+  if (i < 0) return;
+  convos.splice(i, 1);
+  if (curId === detailId) { curId = ""; history.length = 0; }
+  saveConvos();
+  showHistList();
+});
+$("exportAll").addEventListener("click", () => {
+  if (!convos.length) { $("histNote").textContent = "There's nothing to export yet."; return; }
+  downloadFile("ember-voice-history.json", JSON.stringify({ app: "ember-voice", version: 1, exported: new Date().toISOString(), notes, name: userName, convos }, null, 2), "application/json");
+});
+$("importBtn").addEventListener("click", () => $("importFile").click());
+$("importFile").addEventListener("change", async (e) => {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if (!file) return;
+  try {
+    const data = JSON.parse(await readAsText(file));
+    const list = Array.isArray(data) ? data : data && Array.isArray(data.convos) ? data.convos : null;
+    if (!list) throw new Error("format");
+    let n = 0;
+    list.forEach((c) => {
+      if (!c || typeof c.id !== "string" || !Array.isArray(c.msgs)) return;
+      const clean = { id: c.id.slice(0, 40), title: String(c.title || "").slice(0, 80), created: Number(c.created) || Date.now(), updated: Number(c.updated) || Date.now(), msgs: c.msgs.filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string").map((m) => ({ role: m.role, content: m.content.slice(0, 8000), t: Number(m.t) || 0 })) };
+      if (!clean.msgs.length) return;
+      const i = convos.findIndex((x) => x.id === clean.id);
+      if (i >= 0) { if (clean.updated > convos[i].updated) convos[i] = clean; else return; }
+      else convos.push(clean);
+      n++;
+    });
+    if (data && !Array.isArray(data)) {
+      if (Array.isArray(data.notes)) { data.notes.forEach((x) => { if (typeof x === "string" && !notes.includes(x)) notes.push(x.slice(0, 300)); }); saveNotes(); }
+      if (!userName && typeof data.name === "string") { userName = data.name.slice(0, 30); store.set("name", userName); }
+    }
+    convos.sort((a, b) => b.updated - a.updated);
+    saveConvos();
+    renderHist();
+    $("histNote").textContent = n ? "Imported " + n + (n === 1 ? " conversation." : " conversations.") : "Nothing new to import.";
+  } catch (err) { $("histNote").textContent = "That file isn't an Ember history export."; }
+});
+
+function syncHandsUI() {
+  $("handsBtn").setAttribute("aria-pressed", handsOn() && !settings.interactOnly ? "true" : "false");
+  $("handsBtn").title = settings.interactOnly ? "Hands-free is unavailable in Interact Only" : handsOn() ? "Hands-free is on (tap to turn off)" : "Turn hands-free on";
+}
+function setHandsFree(on) {
+  if (on && settings.interactOnly) { flash("Turn off Interact Only first.", 2600); return; }
+  if (on && !SR) { flash("This browser can't listen hands-free.", 3000); return; }
+  settings.wake = on;
+  settings.convo = on;
+  saveSettings();
+  if (on) { scheduleWake(300); flash("Hands-free on. Say “Hey Ember”.", 2600); }
+  else { stopWake(); convo.active = false; stopBarge(); flash("Hands-free off.", 1800); }
+  syncSettingsUI();
+}
+function setInteractOnly(on) {
+  settings.interactOnly = on;
+  saveSettings();
+  if (on) { stopAll(); stopWake(); stopBarge(); convo.active = false; setState("idle"); flash("Interact only: I'll just react to touch.", 2800); }
+  else { setState("idle"); scheduleWake(900); flash("Listening is back on.", 2000); }
+  syncSettingsUI();
+}
+function syncSettingsUI() {
+  $("rateRange").value = settings.rate;
+  $("rateVal").textContent = Number(settings.rate).toFixed(2).replace(/0$/, "");
+  $("voiceSel").value = settings.voiceURI;
+  $("elKey").value = settings.elevenKey;
+  $("elVoice").value = settings.elevenVoiceId;
+  $("elModel").value = settings.elevenModel || "eleven_flash_v2_5";
+  $("provSel").value = settings.provider;
+  const own = settings.provider === "anthropic" || settings.provider === "openai";
+  $("aiFields").hidden = !own;
+  $("clearKey").hidden = !own;
+  $("freeNote").hidden = settings.provider !== "free";
+  $("baseField").hidden = settings.provider !== "openai";
+  $("keyInp").value = settings.apiKey;
+  $("modelInp").value = settings.model;
+  $("modelInp").placeholder = settings.provider === "anthropic" ? "claude-haiku-5-5" : "gpt-4o-mini";
+  $("baseInp").value = settings.baseUrl;
+  $("tavInp").value = settings.tavilyKey;
+  $("wakeChk").checked = !!settings.wake;
+  $("convoChk").checked = !!settings.convo;
+  $("bargeChk").checked = !!settings.barge;
+  $("handsChk").checked = handsOn();
+  $("interactChk").checked = !!settings.interactOnly;
+  ["handsChk", "wakeChk", "convoChk", "bargeChk"].forEach((id) => { $(id).disabled = !!settings.interactOnly; });
+  // theme picker buttons
+  document.querySelectorAll(".theme-choice").forEach((b) => b.setAttribute("aria-pressed", b.dataset.theme === settings.theme ? "true" : "false"));
+  syncHandsUI();
+}
+function openSheet() { syncSettingsUI(); sheet.hidden = false; setTimeout(() => { try { $("closeSheet").focus(); } catch (e) {} }, 50); }
+function closeSheet() { sheet.hidden = true; }
+$("settingsBtn").addEventListener("click", openSheet);
+$("closeSheet").addEventListener("click", closeSheet);
+sheet.addEventListener("click", (e) => { if (e.target === sheet) closeSheet(); });
+
+/* theme buttons */
+document.querySelectorAll(".theme-choice").forEach((b) => {
+  b.addEventListener("click", () => { applyTheme(b.dataset.theme); });
+});
+
+$("voiceSel").addEventListener("change", (e) => { settings.voiceURI = e.target.value; saveSettings(); });
+$("rateRange").addEventListener("input", (e) => { settings.rate = parseFloat(e.target.value) || 1; $("rateVal").textContent = settings.rate.toFixed(2).replace(/0$/, ""); saveSettings(); });
+$("testVoice").addEventListener("click", () => { unlockAudio(); speakText("Hi, I'm Ember. This is how I sound.", { replay: true }); });
+$("elKey").addEventListener("input", (e) => { settings.elevenKey = e.target.value.trim(); saveSettings(); });
+$("elVoice").addEventListener("input", (e) => { settings.elevenVoiceId = e.target.value.trim(); saveSettings(); });
+$("elModel").addEventListener("change", (e) => { settings.elevenModel = e.target.value; saveSettings(); });
+$("testEl").addEventListener("click", () => { if (!useEleven()) { $("elNote").textContent = "Paste a key and a voice ID first."; return; } unlockAudio(); speakText("Hello, I'm Ember. This is my ElevenLabs voice.", { replay: true }); });
+$("provSel").addEventListener("change", (e) => { settings.provider = e.target.value; saveSettings(); syncSettingsUI(); setResult("", ""); });
+$("keyInp").addEventListener("input", (e) => { settings.apiKey = e.target.value.trim(); saveSettings(); });
+$("modelInp").addEventListener("input", (e) => { settings.model = e.target.value.trim(); saveSettings(); });
+$("baseInp").addEventListener("input", (e) => { settings.baseUrl = e.target.value.trim(); saveSettings(); });
+$("tavInp").addEventListener("input", (e) => { settings.tavilyKey = e.target.value.trim(); saveSettings(); updateSearchStatus(); });
+$("wakeChk").addEventListener("change", (e) => { settings.wake = e.target.checked; saveSettings(); if (settings.wake) { if (!SR) { flash("This browser can't listen for a wake word.", 3000); settings.wake = false; saveSettings(); } else scheduleWake(300); } else stopWake(); syncSettingsUI(); });
+$("convoChk").addEventListener("change", (e) => { settings.convo = e.target.checked; saveSettings(); if (!settings.convo) convo.active = false; syncSettingsUI(); });
+$("bargeChk").addEventListener("change", (e) => { settings.barge = e.target.checked; saveSettings(); if (!settings.barge) stopBarge(); });
+$("handsChk").addEventListener("change", (e) => { setHandsFree(e.target.checked); });
+$("interactChk").addEventListener("change", (e) => { setInteractOnly(e.target.checked); });
+$("handsBtn").addEventListener("click", () => setHandsFree(!handsOn()));
+$("clearNotes").addEventListener("click", () => { notes = []; saveNotes(); memory.preferences = {}; memory.goals = []; memory.lastSummary = ""; saveMemory(); $("notesResult").textContent = "Notes and memory cleared."; });
+$("clearKey").addEventListener("click", () => { settings.apiKey = ""; saveSettings(); syncSettingsUI(); setResult("Key removed.", ""); });
+function setResult(text, cls) { const el = $("aiResult"); el.textContent = text; el.className = "note" + (cls ? " " + cls : ""); }
+$("testAI").addEventListener("click", async () => {
+  if (settings.provider === "none") { setResult("Choose an AI model first.", "bad"); return; }
+  if (settings.provider !== "free" && !settings.apiKey.trim()) { setResult("Paste your API key first.", "bad"); return; }
+  setResult("Testing…", "");
+  try {
+    const reply = await callLLM([{ role: "user", content: "Reply with one short friendly sentence so I know you're connected." }], undefined, 60);
+    setResult("Connected. " + (reply ? "It says: " + reply : ""), "ok");
+  } catch (e) {
+    const s = e && e.status;
+    setResult(settings.provider === "free" ? "The free AI isn't answering right now. Try again later, or use your own key." : s === 401 || s === 403 ? "The key was rejected. Check that it's copied in full." : s === 404 ? "That model name wasn't found. Check the model field." : s === 429 ? "The service says you've hit a rate limit. Try again soon." : "Couldn't connect. Check your internet connection and the base URL.", "bad");
+  }
+});
+document.addEventListener("keydown", (e) => {
+  const typing = /^(?:INPUT|TEXTAREA|SELECT)$/.test((e.target && e.target.tagName) || "");
+  if (e.key === "Escape") {
+    if (!histSheet.hidden) closeHist();
+    else if (!sheet.hidden) closeSheet();
+    else if (!typeBar.hidden) openTypeBar(false);
+    else if (state !== "idle") stopAll();
+    return;
+  }
+  if (!typing && sheet.hidden && histSheet.hidden && (e.key === "s" || e.key === "S")) triggerShake();
+});
+
+const HINTS = ["Try “what’s the weather in Paris?”", "Try “set a timer for ten minutes”", "Try “who was Ada Lovelace?”", "Try “what’s fifteen percent of 240?”", "Try “how many miles is ten kilometers?”", "Try “tell me a story”", "Try “remember that my keys are in the blue bag”", "Attach a photo, then ask what’s in it", "Shake your phone, if you dare"];
+let hintIdx = 0;
+function updateHint() {
+  if (state !== "idle" || sleeping || !replyWrap.hidden || !typeBar.hidden) { hintEl.textContent = ""; return; }
+  hintEl.classList.add("fade");
+  setTimeout(() => {
+    const stillOk = state === "idle" && !sleeping && replyWrap.hidden && typeBar.hidden;
+    const list = settings.interactOnly ? ["Touch her gently. Touch her too much and she gets grumpy."] : settings.wake ? ["Say “Hey Ember” any time"].concat(HINTS) : HINTS;
+    hintEl.textContent = stillOk ? list[hintIdx++ % list.length] : "";
+    hintEl.classList.remove("fade");
+  }, 600);
+}
+
+window.addEventListener("resize", resize);
+if (typeof ResizeObserver !== "undefined") new ResizeObserver(resize).observe(canvas);
+if (TTS) { loadVoices(); if (speechSynthesis.addEventListener) speechSynthesis.addEventListener("voiceschanged", loadVoices); else speechSynthesis.onvoiceschanged = loadVoices; }
+window.addEventListener("beforeunload", () => { try { if (TTS) speechSynthesis.cancel(); } catch (e) {} });
+document.addEventListener("visibilitychange", () => {
+  lastT = 0;
+  if (document.hidden) { stopWake(); if (state === "listen") stopListening(); }
+  else { catchUpTimers(); scheduleWake(800); }
+});
+applyTheme(settings.theme || "ember");
+updateAutoBtn();
+syncSettingsUI();
+resize();
+restoreTimers();
+setState("idle");
+updateSearchStatus();
+window.addEventListener("online", updateSearchStatus);
+window.addEventListener("offline", updateSearchStatus);
+setInterval(updateSearchStatus, 15000);
+setTimeout(() => {
+  const now = Date.now();
+  const hoursSince = memory.lastSeen ? (now - memory.lastSeen) / 3600000 : 24;
+  memory.lastSeen = now;
+  saveMemory();
+  if (hoursSince > 4 && state === "idle" && !speaking) {
+    const h = new Date().getHours();
+    let greet = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+    if (userName) greet += ", " + userName;
+    greet += ".";
+    if (memory.goals.length && Math.random() < 0.5) greet += " Still thinking about " + memory.goals[memory.goals.length - 1].text + "?";
+    if (settings.autoRead && speakAvailable()) speakText(greet, { replay: true });
+    else showReply(greet, "");
+  }
+}, 2200);
+if (!SR) { openTypeBar(true); setState("idle", "Voice input isn't available here. Type instead."); }
+else if (!SECURE) { setState("idle", "Open this from an https link so the mic and shake work.", true); }
+setTimeout(updateHint, 1500);
+setInterval(updateHint, 7000);
+if ("serviceWorker" in navigator) { navigator.serviceWorker.register("sw.js").catch(() => {}); }
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
